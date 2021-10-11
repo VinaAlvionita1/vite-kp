@@ -6,11 +6,13 @@ import Api from '../services/api'
 export default defineComponent({
     name: 'Login',
     data(){
-        return{
-            api: new Api,
-            email: 'vina@gmail.com',
-            password: '12345'
+      return{
+        api: new Api,
+        logout: {
+          username: '',
+          password: '',
         }
+      }
     },
     methods: {
         doHome() {
@@ -27,6 +29,11 @@ export default defineComponent({
         },
         doProyek(){
           router.replace('/proyek');
+        },
+        async doLogout(){
+          localStorage.removeItem('token');
+
+          this.$router.replace('/');
         }
     }
 
@@ -48,33 +55,33 @@ export default defineComponent({
           <!-- Nav items -->
           <ul class="navbar-nav mt-4">
             <li class="nav-item">
-              <a class="nav-link" href="" @click="doHome()">
+              <router-link to="/home" class="nav-link">
                 <i class="ni ni-tv-2 text-primary"></i>
                 <span class="nav-link-text">Home</span>
-              </a>
-            </li>
-            <li class="dropdown">
-              <a class="nav-link dropdown" href="" @click="doProyek()">
-                <i class="ni ni-planet text-orange"></i>
-                <span class="nav-link-text">Proyek</span>
-              </a>
+              </router-link>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="" @click="doTugas()">
+              <router-link to="/proyek" class="nav-link">
+                <i class="ni ni-chart-bar-32 text-orange"></i>
+                <span class="nav-link-text">Proyek</span>
+              </router-link>
+            </li>
+            <li class="nav-item">
+              <router-link to="/tugas" class="nav-link">
                 <i class="ni ni-bullet-list-67 text-blue"></i>
                 <span class="nav-link-text">Tugas</span>
-              </a>
+              </router-link>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="" @click="doKaryawan()">
+              <router-link to="/karyawan" class="nav-link">
                 <i class="ni ni-single-02 text-yellow"></i>
                 <span class="nav-link-text">Karyawan</span>
-              </a>
+              </router-link>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="" @click="doLogin()">
+              <a class="nav-link" href="" @click.prevent="doLogout()">
                 <i class="ni ni-button-power text-info"></i>
-                <span class="nav-link-text">Login</span>
+                <span class="nav-link-text">Logout</span>
               </a>
             </li>
           </ul>

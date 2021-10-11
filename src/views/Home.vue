@@ -45,15 +45,7 @@
       <!-- End Isi View -->
 
       <!-- Footer -->
-      <footer class="footer pt-0">
-        <div class="row align-items-center justify-content-lg-between">
-          <div class="col-lg-6">
-            <div class="copyright text-center  text-lg-left  text-muted">
-              CV.FIRMAN SYAH &copy; 2021 <a href="https://www.creative-tim.com" class="font-weight-bold ml-1" target="_blank">Creative Tim</a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <child/>
       <!-- End Footer -->
     </div>
     <!-- End Page Content -->
@@ -64,19 +56,10 @@
 <script>
 import Api from '../services/api'
 import Parent from '../views/Parent.vue'
+import Child from '../views/Child.vue'
 
 export default {
   name: 'Home',
-  async created(){
-    const response = await this.api.getResource('/api/aktif', {
-      headers: {
-        Authorization: 'Bearer ' + localStorage.getItem('token')
-      }
-    });
-
-  console.log(response);
-  },
-
   data() {
     return{
       api: new Api
@@ -84,7 +67,11 @@ export default {
   },
 
   components: {
-    Parent
+    Parent, Child
   },
+
+  async mounted(){
+   const response = await this.api.getResource('/api/aktif')
+  }
 }
 </script>

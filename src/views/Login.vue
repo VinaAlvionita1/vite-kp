@@ -8,18 +8,24 @@ export default defineComponent({
     data(){
         return{
             api: new Api,
+            error: '',
             login: {
                 username: '',
-                password: '',
+                password: ''
             }
         }
     },
     methods: {
         async doLogin() {
-            const response = await this.api.postResource('/api/login', this.login) 
-            localStorage.setItem('token', response.token.original.token)
+            try {
+                const response = await this.api.postResource('/api/login', this.login) 
+                localStorage.setItem('token', response.token.original.token)
 
-            // router.replace('/home');
+                router.replace('/home');
+            } catch (error){
+                this.error = 'Username/Password yang Anda Masukkan Salah!';
+            }
+            
         }
     }
 
@@ -37,6 +43,9 @@ export default defineComponent({
                 <div class="card-body px-lg-5 py-lg-5">
                 <div class="text-center text-muted mb-4">
                     <h2>LOGIN</h2>
+                </div>
+                <div v-if="error" class="alert alert-danger" role="alert">
+                    {{ error }}
                 </div>
                 <form role="form">
                     <div class="form-group mb-3">

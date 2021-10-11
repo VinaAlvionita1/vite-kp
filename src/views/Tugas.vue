@@ -14,7 +14,7 @@
               <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
                 <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
                   <li class="breadcrumb-item"><a href="#"><i class="fas fa-home"></i></a></li>
-                  <li class="breadcrumb-item"><a href="#">Tugas</a></li>
+                  <li class="breadcrumb-item"><a href="#">Proyek</a></li>
                   <li class="breadcrumb-item active" aria-current="page">Tugas</li>
                 </ol>
               </nav>
@@ -26,47 +26,71 @@
     <!-- End Header -->
     
     <!-- Page content -->
-    <div class="container-fluid mt--6">
-
-      <!-- Isi View -->
-      <div class="row">
-        <div class="col">
+   <div class="container-fluid mt--6">
+    <!-- Isi View -->
+    <div class="row">
+      <div class="col">
           <div class="card">
-            <!-- Card header -->
-            <div class="card-header border-0">
-              <h3 class="mb-0">Ini Halaman Tugas!!</h3>
+
+            <div class="row align-items-center py-1">
+              <div class="col text-center">
+                <h6 class="col h2 text-black d-inline-block mb-0">Tugas</h6>
+              </div>
             </div>
 
-            <!-- Isi Content View -->
-
+            <div class="container">
+              <div class="row align-items-center py-3">
+                <div class="col-lg-3">
+                  <select class="form-control">
+                    <option selected>Pilih Milestone</option>
+                    <option value="1">One</option>
+                    <option value="2">Two</option>
+                    <option value="3">Three</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+                
+            <!-- End Card Header -->
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+              <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <router-link to="/tugas-data" class="nav-link">
+                      <span class="nav-link-text">Data Tugas</span>
+                    </router-link>
+                  </li>
+                  <li class="nav-item">
+                    <router-link to="/tugas-berkas" class="nav-link">
+                      <span class="nav-link-text">Berkas</span>
+                    </router-link>
+                  </li>
+                </ul>
+              </div>
+            </nav>
+            <!-- End Navbar -->
           </div>
-        </div>
       </div>
-      <!-- End Isi View -->
-
-      <!-- Footer -->
-      <footer class="footer pt-0">
-        <div class="row align-items-center justify-content-lg-between">
-          <div class="col-lg-6">
-            <div class="copyright text-center  text-lg-left  text-muted">
-              CV.FIRMAN SYAH &copy; 2021 <a href="https://www.creative-tim.com" class="font-weight-bold ml-1" target="_blank">Creative Tim</a>
-            </div>
-          </div>
-        </div>
-      </footer>
-      <!-- End Footer -->
     </div>
-    <!-- End Page Content -->
+  </div>
+  <!-- End Page Content -->
   </div>
   <!-- End Main Content -->
+
 </template>
 
 <script>
 import Parent from '../views/Parent.vue';
+import Child from '../views/Child.vue'
 
 export default {
+  data(){
+    return{
+      isTable: false
+    }
+  },
     components: {
-      Parent
+      Parent, Child
     }
 }
 </script>
