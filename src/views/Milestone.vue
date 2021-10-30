@@ -135,7 +135,7 @@
               <!-- Card header -->
               <div class="row align-items-center py-4">
                 <div class="col-lg-6">
-                  <h6 class="col-lg-6 h2 text-black d-inline-block mb-0">Form Data Proyek</h6>
+                  <h6 class="col-lg-6 h2 text-black d-inline-block mb-0">Form Data Milestone</h6>
                 </div>
               </div>
               <!-- End Card Header -->
@@ -153,11 +153,11 @@
                   </div>
                   <div class="row">
                     <div class="col-lg-8">
-                      <div class="form-group">
-                        <label class="form-control-label" for="nama_proyek">Nama Proyek</label>
-                        <select class="form-control" id="nama_proyek">
+                       <div class="form-group">
+                        <label class="form-control-label" for="input-first-name">Proyek</label>
+                        <select class="form-control" id="id_proyek">
                           <option disabled value="" selected="selected">Pilih Proyek</option>
-                          <option v-for="proyek in Pilihproyek" :key="proyek.id_proyek" :value="proyek.id_proyek"> {{ proyek.nama_proyek }}</option>
+                          <option v-for="proyek in pilihProyek" :key="proyek.id_proyek" :value="proyek.id_proyek"> {{ proyek.nama_proyek }}</option>
                         </select>
                       </div>
                     </div>
@@ -203,11 +203,11 @@ export default {
   data() {
     return{
       api: new Api,
-      milestone: {id_milestone: 0, id_proyek: '', nama_milestone: ''},
+      milestone: {id_milestone: 0, nama_milestone: '', id_proyek: ''},
       milestoneList: [],
       query: '',
       isEditing: false,
-      Pilihproyek: {},
+      pilihProyek: {},
       proyek: ''
     }
   },
@@ -221,7 +221,7 @@ export default {
   },
   async mounted(){
     this.milestoneList = await this.api.getResource('/api/milestone');
-    this.Pilihproyek = await this.api.getResource('/api/proyek');
+    this.pilihProyek = await this.api.getResource('/api/proyek');
   }
 }
 </script>

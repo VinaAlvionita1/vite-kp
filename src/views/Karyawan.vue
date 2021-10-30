@@ -58,7 +58,7 @@
                             </tr>
                         </thead>
                         <tbody class="list">
-                            <tr v-for="(karyawan, i) in karyawanList" :key="i">
+                          <tr v-for="(karyawan, i) in karyawanList" :key="i">
                             <th scope="row">{{ i+1 }}</th>
                             <td scope="row">{{ karyawan.nama_karyawan }}</td>
                             <td scope="row">{{ karyawan.email }}</td>
@@ -68,7 +68,7 @@
                             <button class="btn btn-primary" @click="editKaryawan(i)">Edit</button>
                             <button class="btn btn-danger" @click="hapusKaryawan(i)">Hapus</button>
                             </td>
-                        </tr>
+                          </tr>
                         </tbody>
               </table>
             </div>
@@ -176,12 +176,12 @@ export default {
   name: 'Home',
     data(){
         return{
-            api: new Api,
-            karyawanList: [],
-            karyawan: { id_karyawan: 0, nama_karyawan: '', email: '', telp: '', id_jabatan: ''},
-            isEditing: false,
-            pilihJabatan: {},
-            jabatan: ''
+          api: new Api,
+          karyawanList: [],
+          karyawan: { id_karyawan: 0, nama_karyawan: '', email: '', telp: '', id_jabatan: ''},
+          isEditing: false,
+          pilihJabatan: {},
+          jabatan: ''
         }
     },
     methods: {

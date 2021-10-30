@@ -42,11 +42,9 @@
                 <div class="container">
                   <div class="row align-items-center py-3">
                      <div class="col-lg-3">
-                      <select class="form-control">
-                        <option selected>Pilih Milestone</option>
-                        <option value="1">One</option>
-                        <option value="2">Two</option>
-                        <option value="3">Three</option>
+                      <select class="form-control" id="id_milestone">
+                        <option disabled value="" selected="selected">Pilih Milestone</option>
+                        <option v-for="milestone in pilihMilestone" :key="milestone.id_milestone" :value="milestone.id_milestone"> {{ milestone.nama_milestone }} </option>
                       </select>
                     </div>
                   </div>
@@ -83,14 +81,25 @@
                             <tr>
                                 <th scope="col">No</th>
                                 <th scope="col">Nama Berkas</th>
+                                <th scope="col">File</th>
                                 <th scope="col">Keterangan</th>
                                 <th scope="col">Milestone</th>
+                                <th scope="col">Tanggal Upload</th>
                                 <th scope="col">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="list">
-                          <tr>
-                            
+                          <tr v-for="(berkas, i) in berkasList" :key="i">
+                            <th scope="row">{{ i+1 }}</th>
+                            <td scope="row">{{ berkas.nama_berkas }}</td>
+                            <td scope="row">{{ berkas.file }}</td>
+                            <td scope="row">{{ berkas.keterangan }}</td>
+                            <td scope="row">{{ berkas.nama_milestone }}</td>
+                            <td scope="row">{{ berkas.tgl_upload }}</td>
+                            <td>
+                              <button class="btn btn-primary" @click="editBerkas(i)">Edit</button>
+                              <button class="btn btn-danger" @click="hapusBerkas(i)">Hapus</button>
+                            </td>
                           </tr>              
                         </tbody>
 
@@ -145,38 +154,52 @@
               <!-- Card header -->
               <div class="row align-items-center py-4">
                 <div class="col-lg-6">
-                  <h6 class="col-lg-6 h2 text-black d-inline-block mb-0">Form Data Karyawan</h6>
+                  <h6 class="col-lg-6 h2 text-black d-inline-block mb-0">Form Data Berkas</h6>
                 </div>
               </div>
               <!-- End Card Header -->
               
               <!-- Form Isi -->
-              <form>
+              <form enctype="multipart/form-data">
                 <div class="pl-lg-3">
                   <div class="row">
                     <div class="col-lg-5">
                       <div class="form-group">
-                        <label class="form-control-label" for="nomor_proyek">Nama Berkas</label>
-                        <input type="text" id="nomor_proyek" class="form-control" placeholder="Masukkan Nama Berkas"> 
+                        <label class="form-control-label" for="nama_berkas">Nama Berkas</label>
+                        <input type="text" id="nama_berkas" v-model="berkas.nama_berkas" class="form-control" placeholder="Masukkan Nama Berkas"> 
                       </div>
                     </div>
-                    <div class="col-lg-2"></div>
-                    <div class="col-lg-3">
+                    <div class="col-lg-1"></div>
+                    <div class="col-lg-5">
                       <div class="form-group">
-                        <label class="form-control-label" for="milestone">Milestone</label>
-                        <select class="form-control" id="milestone">
-                          <option disabled value="" selected="selected">Pilih Milestone</option>
-                          <option> Milestone 1 </option>
-                          <option> Milestone 1 </option>
-                        </select>
+                        <label class="form-control-label" for="file">File</label>
+                        <input type="file" id="file" @change="pilih_file($event)" class="form-control" placeholder="Masukkan Nama Berkas"> 
                       </div>
                     </div>
                   </div>
                   <div class="row">
+                    <div class="col-lg-3">
+                      <div class="form-group">
+                        <label class="form-control-label" for="id_milestone">Milestone</label>
+                        <select class="form-control" id="id_milestone" v-model="berkas.id_milestone">
+                          <option disabled value="" selected="selected">Pilih Milestone</option>
+                          <option v-for="milestone in pilihMilestone" :key="milestone.id_milestone" :value="milestone.id_milestone"> {{ milestone.nama_milestone }} </option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-lg-3"></div>
                     <div class="col-lg-6">
                       <div class="form-group">
                         <label class="form-control-label" for="keterangan">Keterangan</label>
-                        <textarea id="keterangan" class="form-control" placeholder="Masukkan Ketengangan"/>
+                        <textarea id="keterangan" v-model="berkas.keterangan" class="form-control" placeholder="Masukkan Ketengangan"/>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-3">
+                      <div class="form-group">
+                        <label class="form-control-label" for="tgl_upload">Tanggal Upload</label>
+                        <input type="date" id="tgl_upload" v-model="berkas.tgl_upload" class="form-control">
                       </div>
                     </div>
                   </div>
@@ -188,7 +211,7 @@
                     
                     </div>
                     <div class="col-lg-11 text-right">
-                      <a class="btn btn-success" @click="simpanProyek()">SIMPAN</a>
+                      <a class="btn btn-success" @click="simpan()">SIMPAN</a>
                       <a class="btn btn-primary" @click="kembali()">KEMBALI</a>
                     </div>
                   </div>
@@ -211,20 +234,86 @@
   <!-- End Main Content -->
 </template>
 
-<script>
+<script lang="ts">
 import Parent from './Parent.vue'
 import Child from './Child.vue'
+import Api from '../services/api'
 
 export default {
   data(){
     return{
-      isEditing: false
+      api: new Api,
+      berkas: {id_berkas: 0, id_milestone: '', nama_berkas: '', file: '', keterangan: '', tgl_upload: ''},
+      berkasList: [],
+      isEditing: false,
+      pilihMilestone: {},
+      milestone: '',
+      file: ''
     }
   },
   methods:{
+    pilih_file(event : any){
+      this.berkas.file = event.target.files[0];
+      const fd = new FormData();
+      for (const event in this.berkas){
+        if(Object.prototype.hasOwnProperty.call(this.berkas, event)){
+          fd.append(event, this.berkas[event]);
+        }
+      }
+    },
+    async simpan() {
+      try {
+      if (this.berkas.nama_berkas.length == 0) {
+        alert('Isi Nama Berkas');
+        return;
+      }
+      if (this.berkas.id_milestone.length == 0) {
+        alert('Isi Milestone pada Berkas');
+        return;
+      }
+      if (this.berkas.file.length == 0) {
+        alert('Isi File Berkas');
+        return;
+      }
+      if (this.berkas.keterangan.length == 0) {
+        alert('Isi Keterangan Berkas');
+        return;
+      }
+      if (this.berkas.tgl_upload.length == 0) {
+        alert('Isi Tanggal Upload Berkas');
+        return;
+      }
+      let url = "/api/berkas";
+      if (this.berkas.id_berkas > 0){
+        url += `/${this.berkas.id_berkas}`
+      };
+      const data = await this.api.postResource(url, this.berkas, this.berkas.id_berkas > 0 ? 'PUT' : 'POST');
+      this.isEditing = false;
+      this.berkas =  {id_berkas: 0, id_milestone: '', nama_berkas: '', file: '', keterangan: '', tgl_upload: ''}
+      this.berkasList = await this.api.getResource('/api/berkas');
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    editBerkas(i: number) {
+      const ambilData = this.berkasList[i];
+      this.berkas = ambilData;
+      this.isEditing = true;
+    },
+    async hapusBerkas(i: number) {
+      const dataHapus = this.berkasList[i];
+      this.berkas = dataHapus;
+      let url = '/api/berkas' + '/' + this.berkas.id_berkas;
+      const data = await this.api.deleteResource(url);
+      this.berkasList = await this.api.getResource('/api/berkas');
+    },
     kembali(){
       this.isEditing = false;
-    }
+    },
+  },
+  async mounted(){
+    this.berkasList = await this.api.getResource('/api/berkas');
+    this.pilihMilestone = await this.api.getResource('/api/milestone');
   },
   components: {
     Parent, Child

@@ -96,7 +96,15 @@
               </table>
             </div>
             <!-- Pagination Card footer -->
-            
+            <form>
+              <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                  <li class="page-item"><a class="page-link" href="#">&lt;</a></li>
+                  <li class="page-item" style="display:flex;"><a @submit.prevent="loadProyek()" class="page-link" href="#" v-for="(page, angka) in pageList" :key="angka">{{ page }}</a></li>
+                  <li class="page-item"><a class="page-link" href="#">&gt;</a></li>
+                </ul>
+              </nav>
+            </form>
             <!-- End Pagination Card Footer -->
             </div>
           </div>
@@ -237,7 +245,11 @@ export default {
         thn_anggaran: '', harga: '', tgl_mulai_proyek: '', tgl_selesai_proyek: ''},
         milestone: {id_milestone: 0, nama_milestone: this.nama_proyek, id_proyek: this.id_proyek},
         isEditing: false,
-        query: ''
+        query: '',
+        page: this.pageList,
+        pageList: [],
+        current_page: '',
+        angka: 5
       }
     },
     methods: {
@@ -305,11 +317,17 @@ export default {
         this.proyek = {id_proyek: 0, nomor_proyek: '', nama_proyek: '', lokasi: '', dinas: '', thn_anggaran: '', harga: '', tgl_mulai_proyek: '', tgl_selesai_proyek: ''}
       },
       async searchProyek(){
-        this.proyekList = await this.api.getResource('/api/proyek?query=' + this.query);
+        const data = await this.api.getResource('/api/proyek?query=' + this.query);
+        this.proyekList = data.data;
+      },
+      async loadProject(){
+        const data = await this.api.getResource('/api/proyek?page=' + this.page);
+        this.proyekList = data.data;
+        this.pageList = data.last_page;
       }
     },
     async mounted(){
-      this.proyekList = await this.api.getResource('/api/proyek');
+      this.loadProject();
     },
     components: {
       Parent, Child,

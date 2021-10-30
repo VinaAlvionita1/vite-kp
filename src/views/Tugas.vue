@@ -41,11 +41,9 @@
             <div class="container">
               <div class="row align-items-center py-3">
                 <div class="col-lg-3">
-                  <select class="form-control">
-                    <option selected>Pilih Milestone</option>
-                    <option value="1">One</option>
-                    <option value="2">Two</option>
-                    <option value="3">Three</option>
+                  <select class="form-control" id="id_milestone">
+                    <option disabled value="" selected="selected">Pilih Milestone</option>
+                    <option v-for="milestone in pilihMilestone" :key="milestone.id_milestone" :value="milestone.id_milestone"> {{ milestone.nama_milestone }} </option>
                   </select>
                 </div>
               </div>
@@ -82,12 +80,21 @@
 <script>
 import Parent from '../views/Parent.vue';
 import Child from '../views/Child.vue'
+import Api from '../services/api';
 
 export default {
   data(){
     return{
-      isTable: false
+      api: new Api,
+      isTable: false,
+      milestone: '',
+      pilihMilestone: {},
+      pilihJabatan: {},
+      jabatan: ''
     }
+  },
+  async mounted(){
+    this.pilihMilestone = await this.api.getResource('/api/milestone');
   },
     components: {
       Parent, Child
