@@ -38,6 +38,19 @@
             </div>
 
             <!-- Isi Content View -->
+            <div class="d-flex justify-content-center">
+              <div class="p-2">Milestone 1</div>
+              <div class="p-2">Milestone 2</div>
+              <div class="p-2">Milestone 3</div>
+            </div>
+
+            <div class="mx-auto">
+              <ul>
+                <li>Merah = Pengerjaan 0%</li>
+                <li>Kuning = Pengerjaan 50%</li>
+                <li>Hijau = Pengerjaan 100%</li>
+              </ul>
+            </div>
 
           </div>
         </div>
@@ -75,3 +88,14 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.p-2 {
+   background: violet;
+   padding-bottom: 100%;
+}
+
+.col-md{
+    margin-top: 10px;
+}
+</style>

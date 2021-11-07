@@ -47,6 +47,28 @@ export default class Api {
         });
     }
 
+    postResourceFile(path: string, data: any, method: string = 'POST'): Promise<any> {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const headers: any = {};
+          const token = localStorage.getItem('token');
+          if (token){
+            headers['Authorization'] = 'Bearer ' + token;
+          } 
+          const response = await fetch(this.host + path, {
+            method: method,
+            headers: {
+              'Authorization': 'Bearer ' + token
+            },
+            body: data
+          });
+          resolve(response.json());
+        } catch (err) {
+          reject(err);
+        }
+      });
+  }
+
     deleteResource(path: string): Promise<any> {
       return new Promise(async (resolve, reject) => {
         try {

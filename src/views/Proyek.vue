@@ -98,9 +98,9 @@
             <!-- Pagination Card footer -->
             <form>
               <nav aria-label="Page navigation example">
-                <ul class="pagination">
+                <ul class="pagination justify-content-end">
                   <li class="page-item"><a class="page-link" href="#">&lt;</a></li>
-                  <li class="page-item" style="display:flex;"><a @submit.prevent="loadProyek()" class="page-link" href="#" v-for="(page, angka) in pageList" :key="angka">{{ page }}</a></li>
+                  <li class="page-item" style="display:flex;"><a @click.prevent="loadProyek()" class="page-link" href="#" v-for="(page, angka) in pageList" :key="angka">{{ page }}</a></li>
                   <li class="page-item"><a class="page-link" href="#">&gt;</a></li>
                 </ul>
               </nav>

@@ -160,7 +160,7 @@
               <!-- End Card Header -->
               
               <!-- Form Isi -->
-              <form enctype="multipart/form-data">
+              <form>
                 <div class="pl-lg-3">
                   <div class="row">
                     <div class="col-lg-5">
@@ -173,7 +173,7 @@
                     <div class="col-lg-5">
                       <div class="form-group">
                         <label class="form-control-label" for="file">File</label>
-                        <input type="file" id="file" @change="pilih_file($event)" class="form-control" placeholder="Masukkan Nama Berkas"> 
+                        <input type="file" id="file" @change="pilihFile($event)" class="form-control" placeholder="Masukkan Nama Berkas"> 
                       </div>
                     </div>
                   </div>
@@ -243,23 +243,16 @@ export default {
   data(){
     return{
       api: new Api,
-      berkas: {id_berkas: 0, id_milestone: '', nama_berkas: '', file: '', keterangan: '', tgl_upload: ''},
+      berkas: <any>{id_berkas: 0, id_milestone: '', nama_berkas: '', file: '', keterangan: '', tgl_upload: ''},
       berkasList: [],
       isEditing: false,
       pilihMilestone: {},
       milestone: '',
-      file: ''
     }
   },
   methods:{
-    pilih_file(event : any){
+    pilihFile(event : any){
       this.berkas.file = event.target.files[0];
-      const fd = new FormData();
-      for (const event in this.berkas){
-        if(Object.prototype.hasOwnProperty.call(this.berkas, event)){
-          fd.append(event, this.berkas[event]);
-        }
-      }
     },
     async simpan() {
       try {
@@ -287,7 +280,13 @@ export default {
       if (this.berkas.id_berkas > 0){
         url += `/${this.berkas.id_berkas}`
       };
-      const data = await this.api.postResource(url, this.berkas, this.berkas.id_berkas > 0 ? 'PUT' : 'POST');
+      const fd = new FormData();
+      for (const event in this.berkas){
+        if(Object.prototype.hasOwnProperty.call(this.berkas, event)){
+          fd.append(event, this.berkas[event]);
+        }
+      }
+      const data = await this.api.postResourceFile(url, fd, this.berkas.id_berkas > 0 ? 'PUT' : 'POST');
       this.isEditing = false;
       this.berkas =  {id_berkas: 0, id_milestone: '', nama_berkas: '', file: '', keterangan: '', tgl_upload: ''}
       this.berkasList = await this.api.getResource('/api/berkas');
