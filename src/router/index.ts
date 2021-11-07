@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router"
 import Home from "../views/Home.vue"
 import Login from "../views/Login.vue"
-import Karyawan from "../views/Karyawan.vue"
+import Karyawan from "../views/Karyawan3.vue"
 import Proyek from "../views/Proyek3.vue"
 import Tugas from "../views/Tugas.vue"
 import DataTugas from "../views/Tugas-data.vue"

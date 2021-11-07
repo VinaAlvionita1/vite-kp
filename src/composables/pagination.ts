@@ -2,7 +2,7 @@ import { computed, Ref, ref } from 'vue'
 import Api from '../services/api';
 import { range } from '../services/helpers';
 
-export default function usePagination(path: string, query: Ref) {
+export default function usePagination(path: string, query?: Ref) {
   const page = ref(1);
   const start = ref(0);
   const end = ref(0);
@@ -34,9 +34,17 @@ export default function usePagination(path: string, query: Ref) {
   }
 
   async function loadData() {
-    const d = await api.getResource(path + `?page=${page.value}&query=${query.value}`);
-    result.value = d.data;
-    generate(Math.ceil(d.total / d.per_page), d.current_page);
+    let q = `?page=${page.value}`;
+    if (query !== undefined) {
+      q += `&query=${query.value}`;
+    }
+    const d = await api.getResource(path + q);
+    if (d.data) {
+      result.value = d.data;
+      generate(Math.ceil(d.total / d.per_page), d.current_page);
+    } else {
+      result.value = d;
+    }
   }
 
   const isFirstPage = computed(() => page.value == 1);
