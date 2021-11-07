@@ -54,9 +54,16 @@ export default class Api {
           const token = localStorage.getItem('token');
           if (token){
             headers['Authorization'] = 'Bearer ' + token;
-          } 
+          }
+
+          // lumen tidak bisa menerima formData yang dikirim dengan method PUT, jadi
+          // yang digunakan tetap POST dengan _method=PUT
+          if (method == 'PUT') {
+            data.append('_method', 'PUT');
+          }
+
           const response = await fetch(this.host + path, {
-            method: method,
+            method: 'POST',
             headers: {
               'Authorization': 'Bearer ' + token
             },
