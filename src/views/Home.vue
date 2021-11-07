@@ -1,5 +1,32 @@
+<script setup lang="ts">
+import Parent from './Parent.vue';
+import Child from './Child.vue';
+
+// import Api from '../services/api'
+// import Parent from '../views/Parent.vue'
+// import Child from '../views/Child.vue'
+
+// export default {
+//   name: 'Home',
+//   data() {
+//     return{
+//       api: new Api
+//     }
+//   },
+
+//   components: {
+//     Parent, Child
+//   },
+
+//   async mounted(){
+//    const response = await this.api.getResource('/api/aktif')
+//   }
+// }
+
+</script>
+
 <template>
-  <parent/>
+  <Parent></Parent>
 
   <!-- Main content -->
   <div class="main-content" id="panel">
@@ -58,36 +85,13 @@
       <!-- End Isi View -->
 
       <!-- Footer -->
-      <child/>
+      <Child></Child>
       <!-- End Footer -->
     </div>
     <!-- End Page Content -->
   </div>
   <!-- End Main Content -->
 </template>
-
-<script>
-import Api from '../services/api'
-import Parent from '../views/Parent.vue'
-import Child from '../views/Child.vue'
-
-export default {
-  name: 'Home',
-  data() {
-    return{
-      api: new Api
-    }
-  },
-
-  components: {
-    Parent, Child
-  },
-
-  async mounted(){
-   const response = await this.api.getResource('/api/aktif')
-  }
-}
-</script>
 
 <style scoped>
 .p-2 {
