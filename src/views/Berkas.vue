@@ -173,6 +173,7 @@
                     <div class="col-lg-5">
                       <div class="form-group">
                         <label class="form-control-label" for="file">File</label>
+                        {{ berkas.file }}
                         <input type="file" id="file" @change="pilihFile($event)" class="form-control" placeholder="Masukkan Nama Berkas"> 
                       </div>
                     </div>

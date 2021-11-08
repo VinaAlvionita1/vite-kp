@@ -292,7 +292,6 @@ export default {
           url += `/${this.proyek.id_proyek}`
         };
         const data = await this.api.postResource(url, this.proyek, this.proyek.id_proyek > 0 ? 'PUT' : 'POST');
-        const dataMilestone = await this.api.postResource('/api/milestone', this.milestone);
         this.isEditing = false;
         this.proyek = {id_proyek: 0, nomor_proyek: '', nama_proyek: '', lokasi: '', dinas: '', thn_anggaran: '', harga: '', tgl_mulai_proyek: '', tgl_selesai_proyek: ''}
         this.proyekList = await this.api.getResource('/api/proyek');

@@ -5,18 +5,9 @@ import Api from '../services/api'
 
 export default defineComponent({
     name: 'Login',
-    data(){
-      return{
-        api: new Api,
-        logout: {
-          username: '',
-          password: '',
-        }
-      }
-    },
     methods: {
         doHome() {
-            router.replace('/home');
+          router.replace('/home');
         },
         doLogin(){
           router.replace('/');
