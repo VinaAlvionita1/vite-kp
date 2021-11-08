@@ -10,13 +10,16 @@
     "apexcharts": "^3.29.0",
     "es6-promise": "^4.2.8",
     "laravel-vue-pagination": "^2.3.1",
+    "sweetalert2": "^11.1.9",
+    "vee-validate": "^4.5.5",
     "vue": "^3.2.6",
     "vue-apexcharts": "^1.6.2",
     "vue-pagination-2": "^3.0.91",
     "vue-plain-pagination": "^0.3.0",
     "vue-router": "^4.0.11",
     "vue3-apexcharts": "^1.4.1",
-    "vuex": "^3.6.2"
+    "vuex": "^3.6.2",
+    "yup": "^0.32.11"
   },
   "devDependencies": {
     "@types/node": "^16.10.1",
