@@ -1,5 +1,104 @@
+<script setup lang="ts">
+import * as yup from 'yup';
+import { useField, useForm } from 'vee-validate';
+import { onMounted, ref } from 'vue';
+import usePagination from '../composables/pagination';
+import Api from '../services/api';
+import { showConfirmDialog } from '../services/helpers';
+import Parent from './Parent.vue';
+import Child from './Child.vue';
+
+    const api: Api = new Api();
+    const { loadData: loadBerkas, result: berkasList } = usePagination('/api/berkas');
+
+    const pilihMilestone = ref<any[]>([]);
+
+    const isEditing = ref(false);
+    const idBerkas = ref(0);
+    const { setValues, meta: metaForm, resetForm } = useForm({
+        validationSchema: yup.object({
+        nama_berkas: yup.string().required().min(3).max(80),
+        file: yup.string().required().min(4).max(2550),
+        keterangan: yup.string().required().min(10).max(10),
+        tgl_upload: yup.string().required().min(10).max(10),
+        id_milestone: yup.string().required().min(1).max(3)
+        })
+    });
+
+    const { value: nama_berkas } = useField('nama_berkas');
+    const { value: keterangan } = useField('keterangan');
+    const { value: file } = useField('file');
+    const { value: tgl_upload } = useField('tgl_upload');
+    const { value: id_milestone } = useField<string>('id_milestone');
+
+    function editBerkas(i?: number) {
+    idBerkas.value = 0;
+    isEditing.value = true;
+        // kalau sedang mengedit
+        if (i !== undefined) {
+        const item = berkasList.value[i];
+        idBerkas.value = item.id_berkas;
+        setValues({ ...item });
+        }
+    }
+
+    function kembali() {
+        isEditing.value = false;
+        resetForm();
+    }
+
+    async function simpanBerkas() {
+    let url = '/api/berkas';
+        if (idBerkas.value > 0) {
+        url += `/${idBerkas.value}`;
+        }
+        // if(file.value == 'object'){
+
+        // }else{
+        //     const fd = new FormData();
+        //     for (const event in nama_berkas.value, keterangan.value, file.value, tgl_upload.value, id_milestone.value){
+        //     if(Object.prototype.hasOwnProperty.call(this.berkas, event)){
+        //         fd.append(event, this.berkas[event]);
+        //     }
+        //     }
+        //     const data = await this.api.postResourceFile(url, fd, this.berkas.id_berkas > 0 ? 'PUT' : 'POST');
+        // }
+        try {
+        await api.postResourceFile(url, { 
+            nama_berkas: nama_berkas.value, keterangan: keterangan.value, file: file.value, tgl_upload: tgl_upload.value, id_milestone: id_milestone.value
+        }, idBerkas.value > 0 ? 'PUT' : 'POST');
+        isEditing.value = false;
+        resetForm();
+        loadBerkas();
+        } catch (err) {
+        console.log(err);
+        }
+    }
+
+    async function hapusBerkas(i: number) {
+    const y = await showConfirmDialog(`Data berkas akan dihapus permanen`);
+        if (y) {
+            try {
+            await api.deleteResource(`/api/berkas/${berkasList.value[i].id_berkas}`);
+            loadBerkas();
+            } catch (err) {
+            console.log(err);
+            }
+        }
+        }
+
+    /**
+     * MOUNTED, LOAD DATA TUGAS
+     */
+    onMounted(async () => {
+    pilihMilestone.value = await api.getResource('/api/milestone');
+    loadBerkas();
+    });
+
+</script>
+
 <template>
-  <parent/>
+  <Parent/>
 
   <!-- Main content -->
   <div class="main-content" id="panel">
@@ -43,7 +142,7 @@
                   <div class="row align-items-center py-3">
                      <div class="col-lg-3">
                       <select class="form-control" id="id_milestone">
-                        <option disabled value="" selected="selected">Pilih Milestone</option>
+                        <option value="">Pilih Milestone</option>
                         <option v-for="milestone in pilihMilestone" :key="milestone.id_milestone" :value="milestone.id_milestone"> {{ milestone.nama_milestone }} </option>
                       </select>
                     </div>
@@ -106,38 +205,14 @@
                     </table>
                 </div>
             <!-- Pagination Card footer -->
-            <div class="card-footer py-4">
-              <nav aria-label="...">
-                <ul class="pagination justify-content-end mb-0">
-                  <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1">
-                      <i class="fas fa-angle-left"></i>
-                      <span class="sr-only">Previous</span>
-                    </a>
-                  </li>
-                  <li class="page-item active">
-                    <a class="page-link" href="#">1</a>
-                  </li>
-                  <li class="page-item">
-                    <a class="page-link" href="#">2 <span class="sr-only">(current)</span></a>
-                  </li>
-                  <li class="page-item"><a class="page-link" href="#">3</a></li>
-                  <li class="page-item">
-                    <a class="page-link" href="#">
-                      <i class="fas fa-angle-right"></i>
-                      <span class="sr-only">Next</span>
-                    </a>
-                  </li>
-                </ul>
-              </nav>
-            </div>
+            
             <!-- End Pagination Card Footer -->
           </div>
         </div>
       </div>
       <!-- End Light Table -->
       <!-- Footer -->
-      <child/>
+      <Child/>
       <!-- End Footer -->
     </div>
     <!-- End Page Content -->
@@ -166,14 +241,14 @@
                     <div class="col-lg-5">
                       <div class="form-group">
                         <label class="form-control-label" for="nama_berkas">Nama Berkas</label>
-                        <input type="text" id="nama_berkas" v-model="berkas.nama_berkas" class="form-control" placeholder="Masukkan Nama Berkas"> 
+                        <input type="text" id="nama_berkas" v-model="nama_berkas" class="form-control" placeholder="Masukkan Nama Berkas"> 
                       </div>
                     </div>
                     <div class="col-lg-1"></div>
                     <div class="col-lg-5">
                       <div class="form-group">
                         <label class="form-control-label" for="file">File</label><br>
-                        {{ berkas.file }}
+                        {{ file }}
                         <input type="file" id="file" @change="pilihFile($event)" class="form-control" placeholder="Masukkan Nama Berkas"> 
                       </div>
                     </div>
@@ -182,8 +257,8 @@
                     <div class="col-lg-3">
                       <div class="form-group">
                         <label class="form-control-label" for="id_milestone">Milestone</label>
-                        <select class="form-control" id="id_milestone" v-model="berkas.id_milestone">
-                          <option disabled value="" selected="selected">Pilih Milestone</option>
+                        <select class="form-control" id="id_milestone" v-model="id_milestone">
+                          <option value="">Pilih Milestone</option>
                           <option v-for="milestone in pilihMilestone" :key="milestone.id_milestone" :value="milestone.id_milestone"> {{ milestone.nama_milestone }} </option>
                         </select>
                       </div>
@@ -192,7 +267,7 @@
                     <div class="col-lg-6">
                       <div class="form-group">
                         <label class="form-control-label" for="keterangan">Keterangan</label>
-                        <textarea id="keterangan" v-model="berkas.keterangan" class="form-control" placeholder="Masukkan Ketengangan"/>
+                        <textarea id="keterangan" value="keterangan" class="form-control" placeholder="Masukkan Ketengangan"/>
                       </div>
                     </div>
                   </div>
@@ -200,7 +275,7 @@
                     <div class="col-lg-3">
                       <div class="form-group">
                         <label class="form-control-label" for="tgl_upload">Tanggal Upload</label>
-                        <input type="date" id="tgl_upload" v-model="berkas.tgl_upload" class="form-control">
+                        <input type="date" id="tgl_upload" v-model="tgl_upload" class="form-control">
                       </div>
                     </div>
                   </div>
@@ -212,7 +287,7 @@
                     
                     </div>
                     <div class="col-lg-11 text-right">
-                      <a class="btn btn-success" @click="simpan()">SIMPAN</a>
+                      <a class="btn btn-success" @click="simpanBerkas()">SIMPAN</a>
                       <a class="btn btn-primary" @click="kembali()">KEMBALI</a>
                     </div>
                   </div>
@@ -234,93 +309,3 @@
   </div>
   <!-- End Main Content -->
 </template>
-
-<script lang="ts">
-import Parent from './Parent.vue'
-import Child from './Child.vue'
-import Api from '../services/api'
-
-export default {
-  data(){
-    return{
-      api: new Api,
-      berkas: <any>{id_berkas: 0, id_milestone: '', nama_berkas: '', file: '', keterangan: '', tgl_upload: ''},
-      berkasList: [],
-      isEditing: false,
-      pilihMilestone: {},
-      milestone: '',
-    }
-  },
-  methods:{
-    pilihFile(event : any){
-      this.berkas.file = event.target.files[0];
-    },
-    async simpan() {
-      try {
-      if (this.berkas.nama_berkas.length == 0) {
-        alert('Isi Nama Berkas');
-        return;
-      }
-      if (this.berkas.id_milestone.length == 0) {
-        alert('Isi Milestone pada Berkas');
-        return;
-      }
-      if (this.berkas.file.length == 0) {
-        alert('Isi File Berkas');
-        return;
-      }
-      if (this.berkas.keterangan.length == 0) {
-        alert('Isi Keterangan Berkas');
-        return;
-      }
-      if (this.berkas.tgl_upload.length == 0) {
-        alert('Isi Tanggal Upload Berkas');
-        return;
-      }
-      let url = "/api/berkas";
-      if (this.berkas.id_berkas > 0){
-        url += `/${this.berkas.id_berkas}`
-      };
-      if(this.berkas.file == 'object'){
-
-      }else{
-        const fd = new FormData();
-        for (const event in this.berkas){
-          if(Object.prototype.hasOwnProperty.call(this.berkas, event)){
-            fd.append(event, this.berkas[event]);
-          }
-        }
-        const data = await this.api.postResourceFile(url, fd, this.berkas.id_berkas > 0 ? 'PUT' : 'POST');
-      }
-      this.isEditing = false;
-      this.berkas =  {id_berkas: 0, id_milestone: '', nama_berkas: '', file: '', keterangan: '', tgl_upload: ''}
-      this.berkasList = await this.api.getResource('/api/berkas');
-      } catch (err) {
-        console.log(err);
-      }
-    },
-    editBerkas(i: number) {
-      const ambilData = this.berkasList[i];
-      this.berkas = ambilData;
-      this.isEditing = true;
-    },
-    async hapusBerkas(i: number) {
-      const dataHapus = this.berkasList[i];
-      this.berkas = dataHapus;
-      let url = '/api/berkas' + '/' + this.berkas.id_berkas;
-      const data = await this.api.deleteResource(url);
-      this.berkasList = await this.api.getResource('/api/berkas');
-    },
-    kembali(){
-      this.isEditing = false;
-    },
-  },
-  async mounted(){
-    this.berkasList = await this.api.getResource('/api/berkas');
-    this.pilihMilestone = await this.api.getResource('/api/milestone');
-  },
-  components: {
-    Parent, Child
-  }
-}
-</script>

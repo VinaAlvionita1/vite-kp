@@ -1,5 +1,105 @@
+<script setup lang="ts">
+import Parent from './Parent.vue';
+import Child from './Child.vue';
+import Api from '../services/api';
+import usePagination from '../composables/pagination';
+import { onMounted, ref } from 'vue';
+import { useField, useForm } from 'vee-validate';
+import * as yup from 'yup';
+import { showConfirmDialog } from '../services/helpers';
+
+  const api: Api = new Api();
+  const { loadData: loadTugas, result: tugasList } = usePagination('/api/tugas');
+
+  const pilihMilestone = ref<any[]>([]);
+  const pilihKategori = ref<any[]>([]);
+  const pilihStatus = ref<any[]>([]);
+  const pilihKaryawan = ref<any[]>([]);
+
+  const isEditing = ref(false);
+  const idTugas = ref(0);
+  const { setValues, meta: metaForm, resetForm } = useForm({
+    validationSchema: yup.object({
+      nama_tugas: yup.string().required().min(3).max(80),
+      keterangan_tugas: yup.string().required().min(4).max(2550),
+      tgl_mulai_tugas: yup.string().required().min(10).max(10),
+      tgl_selesai_tugas: yup.string().required().min(10).max(10),
+      id_milestone: yup.string().required().min(1).max(3),
+      id_kategori: yup.string().required().min(1).max(3),
+      id_status: yup.string().required().min(1).max(3),
+      id_karyawan: yup.string().required().min(1).max(3),
+    })
+  });
+
+  const { value: nama_tugas } = useField('nama_tugas');
+  const { value: keterangan_tugas } = useField('keterangan_tugas');
+  const { value: tgl_mulai_tugas } = useField('tgl_mulai_tugas');
+  const { value: tgl_selesai_tugas } = useField('tgl_selesai_tugas');
+  const { value: id_milestone } = useField<string>('id_milestone');
+  const { value: id_kategori } = useField<string>('id_kategori');
+  const { value: id_status } = useField<string>('id_status');
+  const { value: id_karyawan } = useField<string>('id_karyawan');
+
+  function editTugas(i?: number) {
+  idTugas.value = 0;
+  isEditing.value = true;
+    // kalau sedang mengedit
+    if (i !== undefined) {
+      const item = tugasList.value[i];
+      idTugas.value = item.id_tugas;
+      setValues({ ...item });
+    }
+  }
+
+  function kembali() {
+    isEditing.value = false;
+    resetForm();
+  }
+
+  async function simpanTugas() {
+  let url = '/api/tugas';
+    if (idTugas.value > 0) {
+      url += `/${idTugas.value}`;
+    }
+    try {
+      await api.postResource(url, { 
+        nama_tugas: nama_tugas.value, keterangan_tugas: keterangan_tugas.value, tgl_mulai_tugas: tgl_mulai_tugas.value, tgl_selesai_tugas: tgl_selesai_tugas.value, id_milestone: id_milestone.value, id_kategori: id_kategori.value, id_status: id_status.value, id_karyawan: id_karyawan.value
+      }, idTugas.value > 0 ? 'PUT' : 'POST');
+      isEditing.value = false;
+      resetForm();
+      loadTugas();
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  async function hapusTugas(i: number) {
+  const y = await showConfirmDialog(`Data tugas akan dihapus permanen`);
+  if (y) {
+    try {
+      await api.deleteResource(`/api/tugas/${tugasList.value[i].id_tugas}`);
+      loadTugas();
+    } catch (err) {
+      console.log(err);
+    }
+  }
+}
+
+/**
+ * MOUNTED, LOAD DATA TUGAS
+ */
+onMounted(async () => {
+  pilihMilestone.value = await api.getResource('/api/milestone');
+  pilihKategori.value = await api.getResource('/api/kategori');
+  pilihStatus.value = await api.getResource('/api/status');
+  pilihKaryawan.value = await api.getResource('/api/karyawan');
+  loadTugas();
+});
+
+</script>
+
 <template>
-  <parent/>
+    <Parent/>
 
   <!-- Main content -->
   <div class="main-content" id="panel">
@@ -40,8 +140,8 @@
           <div class="container">
             <div class="row align-items-center py-3">
                 <div class="col-lg-3">
-                <select class="form-control" id="id_milestone">
-                  <option disabled value="" selected="selected">Pilih Milestone</option>
+                <select class="form-control" id="id_milestone" v-model="id_milestone">
+                  <option value="">Pilih Milestone</option>
                   <option v-for="milestone in pilihMilestone" :key="milestone.id_milestone" :value="milestone.id_milestone"> {{ milestone.nama_milestone }} </option>
                 </select>
               </div>
@@ -69,7 +169,7 @@
           <!-- End Navbar -->
 
           <div class="col-lg-12 mt-2 text-right">
-            <a href="#" class="btn btn-primary" type="button" @click="isEditing = true"> + Tugas </a>
+            <a href="#" class="btn btn-primary" type="button" @click="editTugas()"> + Tugas </a>
             <span>
               <router-link to="/milestone" class="btn btn-warning" type="button">Atur Milestone</router-link>
             </span>
@@ -112,38 +212,14 @@
             </table>
           </div>
           <!-- Pagination Card footer -->
-          <div class="card-footer py-4">
-            <nav aria-label="...">
-              <ul class="pagination justify-content-end mb-0">
-                <li class="page-item disabled">
-                  <a class="page-link" href="#" tabindex="-1">
-                    <i class="fas fa-angle-left"></i>
-                    <span class="sr-only">Previous</span>
-                  </a>
-                </li>
-                <li class="page-item active">
-                  <a class="page-link" href="#">1</a>
-                </li>
-                <li class="page-item">
-                  <a class="page-link" href="#">2 <span class="sr-only">(current)</span></a>
-                </li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item">
-                  <a class="page-link" href="#">
-                    <i class="fas fa-angle-right"></i>
-                    <span class="sr-only">Next</span>
-                  </a>
-                </li>
-              </ul>
-            </nav>
-          </div>
+           <!-- <Pagination :current-page="currentPage" :is-first-page="isFirstPage" :is-last-page="isLastPage" :goto-page="gotoPage" :next-page="nextPage" :prev-page="prevPage" :page-list="pageList"></Pagination> -->
           <!-- End Pagination Card Footer -->
         </div>
       </div>
     </div>
     <!-- End Light Table -->
     <!-- Footer -->
-    <child/>
+    <Child/>
     <!-- End Footer -->
   </div>
   <!-- End Page Content -->
@@ -171,15 +247,15 @@
                   <div class="col-lg-5">
                     <div class="form-group">
                       <label class="form-control-label" for="nama_tugas">Nama Tugas</label>
-                      <input type="text" id="nama_tugas" v-model="tugas.nama_tugas"  class="form-control" placeholder="Masukkan Nama Tugas">
+                      <input type="text" id="nama_tugas" v-model="nama_tugas"  class="form-control" placeholder="Masukkan Nama Tugas">
                     </div>
                   </div>
                   <div class="col-lg-1"></div>
                   <div class="col-lg-5">
                     <div class="form-group">
                       <label class="form-control-label" for="milestone">Milestone</label>
-                      <select class="form-control" id="id_milestone" v-model="tugas.id_milestone">
-                        <option disabled value="" selected="selected">Pilih Milestone</option>
+                      <select class="form-control" id="id_milestone" v-model="id_milestone">
+                        <option value="">Pilih Milestone</option>
                         <option v-for="milestone in pilihMilestone" :key="milestone.id_milestone" :value="milestone.id_milestone"> {{ milestone.nama_milestone }} </option>
                         
                       </select>
@@ -192,13 +268,13 @@
                   <div class="col-lg-6">
                     <div class="form-group">
                       <label class="form-control-label" for="keterangan">Keterangan</label>
-                      <textarea id="nama_proyek" v-model="tugas.keterangan_tugas" class="form-control" placeholder="Masukkan Keterangan"/>
+                      <textarea value="keterangan_tugas" id="keterangasn_tugas" class="form-control" placeholder="Masukkan Keterangan"></textarea>
                     </div>
                   </div>
                   <div class="col-lg-2">
                     <div class="form-group">
                       <label class="form-control-label" for="tgl_mulai_proyek">Tanggal Mulai</label>
-                      <input type="date" id="tgl_mulai_proyek" v-model="tugas.tgl_mulai_tugas" class="form-control" placeholder="Tanggal Mulai">
+                      <input type="date" id="tgl_mulai_proyek" v-model="tgl_mulai_tugas" class="form-control" placeholder="Tanggal Mulai">
                     </div>
                   </div>
                 </div>
@@ -206,15 +282,15 @@
                   <div class="col-lg-2">
                     <div class="form-group">
                       <label class="form-control-label" for="tgl_selesai_proyek">Tanggal Selesai</label>
-                      <input type="date" id="tgl_selesai_proyek" v-model="tugas.tgl_selesai_tugas" class="form-control" placeholder="Tanggal Selesai">
+                      <input type="date" id="tgl_selesai_proyek" v-model="tgl_selesai_tugas" class="form-control" placeholder="Tanggal Selesai">
                     </div>
                   </div>
                   <div class="col-lg-4"></div>
                   <div class="col-lg-3">
                     <div class="form-group">
                       <label class="form-control-label" for="status">Status Pengerjaan</label>
-                      <select class="form-control" id="id_status" v-model="tugas.id_status">
-                        <option disabled value="" selected="selected">Pilih Status Pengerjaan</option>
+                      <select class="form-control" id="id_status" v-model="id_status">
+                        <option value="">Pilih Status Pengerjaan</option>
                         <option v-for="status in pilihStatus" :key="status.id_status" :value="status.id_status"> {{ status.nama_statuskerja }} </option>
                       </select>
                     </div>
@@ -224,8 +300,8 @@
                   <div class="col-lg-3">
                     <div class="form-group">
                       <label class="form-control-label" for="kategori">Kategori Tugas</label>
-                      <select class="form-control" id="id_kategori" v-model="tugas.id_kategori">
-                        <option disabled value="" selected="selected">Pilih Kategori </option>
+                      <select class="form-control" id="id_kategori" v-model="id_kategori">
+                        <option value="">Pilih Kategori </option>
                         <option v-for="kategori in pilihKategori" :key="kategori.id_kategori" :value="kategori.id_kategori"> {{ kategori.status_kategori }} </option>
                       </select>
                     </div>
@@ -234,8 +310,8 @@
                   <div class="col-lg-3">
                     <div class="form-group">
                       <label class="form-control-label" for="id_karyawan">Penanggung Jawab</label>
-                      <select class="form-control" id="id_karyawan" v-model="tugas.id_karyawan">
-                        <option disabled value="" selected="selected">Pilih Penanggung Jawab</option>
+                      <select class="form-control" id="id_karyawan" v-model="id_karyawan">
+                        <option value="">Pilih Penanggung Jawab</option>
                         <option v-for="karyawan in pilihKaryawan" :key="karyawan.id_karyawan" :value="karyawan.id_karyawan"> {{ karyawan.nama_karyawan }} </option>
                       </select>
                     </div>
@@ -245,7 +321,7 @@
               <div class="row align-items-center py-4">
                 <div class="col-lg-5"></div>
                 <div class="col-lg-10 text-right">
-                  <a class="btn btn-success" @click="simpanTugas()">SIMPAN</a>
+                  <a class="btn btn-success" :class="{ disabled: ! metaForm.valid }" :disabled=" ! metaForm.valid" @click="simpanTugas()">SIMPAN</a>
                   <a class="btn btn-primary" @click="kembali()">KEMBALI</a>
                 </div>
               </div>
@@ -256,113 +332,11 @@
       </div>
       <!-- End Content Table -->
       <!-- Footer -->
-      <child/>
+      <Child/>
       <!-- End Footer -->
     </div>
     <!-- End Page Form Edit dan Tambah -->
 
   </div>
   <!-- End Main Content -->
-
 </template>
-
-<script lang="ts">
-import Parent from './Parent.vue';
-import Child from './Child.vue'
-import Api from '../services/api';
-
-export default {
-  name: 'DataTugas',
-  data(){
-    return{
-      api: new Api,
-      isEditing: false,
-      tugas: {id_tugas: 0, id_status: '', id_kategori: '', id_karyawan: '', id_milestone: '', nama_tugas: '', keterangan_tugas: '', tgl_mulai_tugas: '', tgl_selesai_tugas: ''},
-      tugasList: [],
-      pilihMilestone: {},
-      milestone: '',
-      pilihKategori: {},
-      kategori: '',
-      pilihStatus: {},
-      status: '',
-      pilihKaryawan: {},
-      karyawan: ''
-    }
-  },
-  methods:{
-    async simpanTugas() {
-        try {
-        if (this.tugas.nama_tugas.length == 0) {
-          alert('Isi Nama Tugas');
-          return;
-        }
-        if (this.tugas.keterangan_tugas.length == 0) {
-          alert('Isi Keterangan Tugas');
-          return;
-        }
-        if (this.tugas.tgl_mulai_tugas.length == 0) {
-          alert('Isi Tanggal Mulai Tugas');
-          return;
-        }
-        if (this.tugas.tgl_selesai_tugas.length == 0) {
-          alert('Isi Tanggal Selesai Tugas');
-          return;
-        }
-        if (this.tugas.id_status.length == 0) {
-          alert('Isi Status Pengerjaan Tugas');
-          return;
-        }
-        if (this.tugas.id_kategori.length == 0) {
-          alert('Isi Kategori Tugas');
-          return;
-        }
-        if (this.tugas.id_karyawan.length == 0) {
-          alert('Isi Penanggung Jawab Tugas');
-          return;
-        }
-        if (this.tugas.id_milestone.length == 0) {
-          alert('Isi Milestone Tugas');
-          return;
-        }
-
-        let url = "/api/tugas";
-        if (this.tugas.id_tugas > 0){
-          url += `/${this.tugas.id_tugas}`
-        };
-        const data = await this.api.postResource(url, this.tugas, this.tugas.id_tugas > 0 ? 'PUT' : 'POST');
-        this.isEditing = false;
-        this.tugas = {id_tugas: 0, id_status: '', id_kategori: '', id_karyawan: '', id_milestone: '', nama_tugas: '', keterangan_tugas: '', tgl_mulai_tugas: '', tgl_selesai_tugas: ''}
-        this.tugasList = await this.api.getResource('/api/tugas');
-        } catch (err) {
-          console.log(err);
-        }
-      },
-      editTugas(i: number) {
-        const ambilData = this.tugasList[i];
-        this.tugas = ambilData;
-        this.isEditing = true;
-      },
-      async hapusTugas(i: number) {
-        const dataHapus = this.tugasList[i];
-        this.tugas= dataHapus;
-        let url = '/api/tugas' + '/' + this.tugas.id_tugas;
-        const data = await this.api.deleteResource(url);
-        this.tugasList = await this.api.getResource('/api/tugas');
-      },
-      kembali(){
-        this.isEditing = false;
-        this.tugas = {id_tugas: 0, id_status: '', id_kategori: '', id_karyawan: '', id_milestone: '', nama_tugas: '', keterangan_tugas: '', tgl_mulai_tugas: '', tgl_selesai_tugas: ''}
-      }
-  },
-  async mounted(){
-    this.tugasList = await this.api.getResource('/api/tugas')
-    this.pilihMilestone = await this.api.getResource('/api/milestone');
-    this.pilihKategori = await this.api.getResource('/api/kategori');
-    this.pilihStatus = await this.api.getResource('/api/status');
-    this.pilihKaryawan = await this.api.getResource('/api/karyawan');
-  },
-  components: {
-    Parent, Child
-  }
-}
-</script>

@@ -140,7 +140,6 @@ onMounted(() => loadProyek());
               <div class="col-lg-6">
                 <form class="form-inline ml-3">
                   <input class="form-control mr-sm-1" @keyup="loadProyek" v-model="query" type="search" placeholder="Cari..." aria-label="Search">
-                  <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Cari</button>
                 </form>
               </div>
               <div class="col-lg-6 text-right">
@@ -167,7 +166,7 @@ onMounted(() => loadProyek());
                   <td>
                     <div class="row">
                       <div class="col">
-                        <h4 class="mb-1"><span class="badge badge-info">{{ proyek.dinas }}</span> {{ proyek.nama_proyek }}</h4>
+                        <h4 class="mb-1">{{ proyek.nama_proyek }} <span class="badge badge-info">{{ proyek.dinas }}</span> </h4>
                         <div class="d-flex justify-content-between">
                           <span title="nomor">{{ proyek.nomor_proyek }}</span>
                           <span>
@@ -214,7 +213,7 @@ onMounted(() => loadProyek());
             <!-- Card header -->
             <div class="row align-items-center py-4">
               <div class="col-lg-6">
-                <h6 class="col-lg-6 h2 text-black d-inline-block mb-0">Edit Data Karyawan</h6>
+                <h6 class="col-lg-6 h2 text-black d-inline-block mb-0">Form Data Proyek</h6>
               </div>
             </div>
             <!-- End Card Header -->
@@ -292,7 +291,7 @@ onMounted(() => loadProyek());
                   
                   </div>
                   <div class="col-lg-11 text-right">
-                    <a href="" class="btn btn-success" :class="{ disabled: ! metaForm.valid }" @click.prevent="simpanProyek()" :disabled=" ! metaForm.valid">SIMPAN DATA</a>
+                    <a href="" class="btn btn-success" :class="{ disabled: ! metaForm.valid }" @click="simpanProyek()" :disabled=" ! metaForm.valid">SIMPAN DATA</a>
                     <a href="" class="btn btn-primary" @click.prevent="kembali()">KEMBALI</a>
                   </div>
                 </div>

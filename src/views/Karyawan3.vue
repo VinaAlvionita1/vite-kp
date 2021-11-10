@@ -170,7 +170,7 @@ onMounted(async () => {
               <!-- Card header -->
               <div class="row align-items-center py-4">
                 <div class="col-lg-6">
-                  <h6 class="col-lg-6 h2 text-black d-inline-block mb-0">Edit Data Proyek</h6>
+                  <h6 class="col-lg-6 h2 text-black d-inline-block mb-0">Form Data Karyawan</h6>
                 </div>
               </div>
               <!-- End Card Header -->
