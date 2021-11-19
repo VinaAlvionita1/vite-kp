@@ -31,10 +31,11 @@ const { setValues, meta: metaForm, resetForm } = useForm({
     dinas: yup.string().required().min(3).max(60),
     thn_anggaran: yup.number().required().min(1970).max(4000),
     harga: yup.number().required().min(1),
-    tgl_mulai_proyek: yup.string().required().min(10).max(10),
-    tgl_selesai_proyek: yup.string().required().min(10).max(10),
+    tgl_mulai_proyek: yup.string().required().min(2).max(10),
+    tgl_selesai_proyek: yup.string().required().min(2).max(10),
   })
 });
+
 const { value: nomor_proyek } = useField('nomor_proyek');
 const { value: nama_proyek } = useField('nama_proyek');
 const { value: lokasi } = useField('lokasi');
@@ -166,9 +167,9 @@ onMounted(() => loadProyek());
                   <td>
                     <div class="row">
                       <div class="col">
-                        <h4 class="mb-1">{{ proyek.nama_proyek }} <span class="badge badge-info">{{ proyek.dinas }}</span> </h4>
+                        <p title="nomor">{{ proyek.nomor_proyek }} <span class="badge badge-info">{{ proyek.dinas }}</span></p>
                         <div class="d-flex justify-content-between">
-                          <span title="nomor">{{ proyek.nomor_proyek }}</span>
+                          <h4 class="mb-1">{{ proyek.nama_proyek }} </h4>
                           <span>
                             <span class="badge badge-success fs-5 font-weight-bolder" title="tanggal mulai">{{ proyek.tgl_mulai_proyek.split('-').reverse().join('/') }}</span> - <span title="tanggal_selesai" class="badge badge-danger font-weight-bolder">{{ proyek.tgl_selesai_proyek.split('-').reverse().join('/') }}</span>
                           </span>
@@ -191,7 +192,6 @@ onMounted(() => loadProyek());
           </div>
           <!-- Pagination Card footer -->
           <Pagination :current-page="currentPage" :is-first-page="isFirstPage" :is-last-page="isLastPage" :goto-page="gotoPage" :next-page="nextPage" :prev-page="prevPage" :page-list="pageList"></Pagination>
-
           <!-- End Pagination Card Footer -->
           </div>
         </div>

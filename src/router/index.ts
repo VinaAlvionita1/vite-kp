@@ -4,8 +4,8 @@ import Login from "../views/Login.vue"
 import Karyawan from "../views/Karyawan3.vue"
 import Proyek from "../views/Proyek3.vue"
 import Tugas from "../views/Tugas.vue"
-import DataTugas from "../views/Tugas-data.vue"
-import Berkas from "../views/Berkas.vue"
+import DataTugas from "../views/Tugas-data3.vue"
+import Berkas from "../views/Berkas3.vue"
 import Milestone from "../views/Milestone.vue"
 
 const routes: Array<RouteRecordRaw> = [

@@ -7,9 +7,12 @@ import Api from '../services/api';
 import { showConfirmDialog } from '../services/helpers';
 import Parent from './Parent.vue';
 import Child from './Child.vue';
+import Pagination from '../components/pagination.vue';
 
     const api: Api = new Api();
-    const { loadData: loadBerkas, result: berkasList } = usePagination('/api/berkas');
+    const { loadData: loadBerkas, result: berkasList, pages: pageList,
+    page: currentPage, isFirstPage, isLastPage, gotoPage,
+    nextPage, prevPage } = usePagination('/api/berkas');
 
     const pilihMilestone = ref<any[]>([]);
 
@@ -19,7 +22,7 @@ import Child from './Child.vue';
         validationSchema: yup.object({
         nama_berkas: yup.string().required().min(3).max(80),
         file: yup.string().required().min(4).max(2550),
-        keterangan: yup.string().required().min(10).max(10),
+        keterangan: yup.string().required().min(10).max(1000),
         tgl_upload: yup.string().required().min(10).max(10),
         id_milestone: yup.string().required().min(1).max(3)
         })
@@ -30,6 +33,8 @@ import Child from './Child.vue';
     const { value: file } = useField('file');
     const { value: tgl_upload } = useField('tgl_upload');
     const { value: id_milestone } = useField<string>('id_milestone');
+
+    const pilihFile = ref();
 
     function editBerkas(i?: number) {
     idBerkas.value = 0;
@@ -52,17 +57,6 @@ import Child from './Child.vue';
         if (idBerkas.value > 0) {
         url += `/${idBerkas.value}`;
         }
-        // if(file.value == 'object'){
-
-        // }else{
-        //     const fd = new FormData();
-        //     for (const event in nama_berkas.value, keterangan.value, file.value, tgl_upload.value, id_milestone.value){
-        //     if(Object.prototype.hasOwnProperty.call(this.berkas, event)){
-        //         fd.append(event, this.berkas[event]);
-        //     }
-        //     }
-        //     const data = await this.api.postResourceFile(url, fd, this.berkas.id_berkas > 0 ? 'PUT' : 'POST');
-        // }
         try {
         await api.postResourceFile(url, { 
             nama_berkas: nama_berkas.value, keterangan: keterangan.value, file: file.value, tgl_upload: tgl_upload.value, id_milestone: id_milestone.value
@@ -205,7 +199,7 @@ import Child from './Child.vue';
                     </table>
                 </div>
             <!-- Pagination Card footer -->
-            
+            <Pagination :current-page="currentPage" :is-first-page="isFirstPage" :is-last-page="isLastPage" :goto-page="gotoPage" :next-page="nextPage" :prev-page="prevPage" :page-list="pageList"></Pagination>
             <!-- End Pagination Card Footer -->
           </div>
         </div>
@@ -267,7 +261,7 @@ import Child from './Child.vue';
                     <div class="col-lg-6">
                       <div class="form-group">
                         <label class="form-control-label" for="keterangan">Keterangan</label>
-                        <textarea id="keterangan" value="keterangan" class="form-control" placeholder="Masukkan Ketengangan"/>
+                        <textarea id="keterangan" v-model="keterangan" class="form-control" placeholder="Masukkan Ketengangan"/>
                       </div>
                     </div>
                   </div>

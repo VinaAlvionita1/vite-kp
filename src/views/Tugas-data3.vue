@@ -7,11 +7,15 @@ import { onMounted, ref } from 'vue';
 import { useField, useForm } from 'vee-validate';
 import * as yup from 'yup';
 import { showConfirmDialog } from '../services/helpers';
+import Pagination from '../components/pagination.vue';
 
   const api: Api = new Api();
-  const { loadData: loadTugas, result: tugasList } = usePagination('/api/tugas');
+  const { loadData: loadTugas, result: tugasList, pages: pageList,
+  page: currentPage, isFirstPage, isLastPage, gotoPage,
+  nextPage, prevPage } = usePagination('/api/tugas');
 
-  const pilihMilestone = ref<any[]>([]);
+  const { loadData: loadMilestone, result: pilihMilestone } = usePagination('/api/milestone');
+
   const pilihKategori = ref<any[]>([]);
   const pilihStatus = ref<any[]>([]);
   const pilihKaryawan = ref<any[]>([]);
@@ -29,7 +33,7 @@ import { showConfirmDialog } from '../services/helpers';
       id_status: yup.string().required().min(1).max(3),
       id_karyawan: yup.string().required().min(1).max(3),
     })
-  });
+   });
 
   const { value: nama_tugas } = useField('nama_tugas');
   const { value: keterangan_tugas } = useField('keterangan_tugas');
@@ -47,7 +51,9 @@ import { showConfirmDialog } from '../services/helpers';
     if (i !== undefined) {
       const item = tugasList.value[i];
       idTugas.value = item.id_tugas;
-      setValues({ ...item });
+      setValues({
+      nama_tugas: item.nama_tugas, keterangan_tugas: item.keterangan_tugas, tgl_mulai_tugas: item.tgl_mulai_tugas, tgl_selesai_tugas: item.tgl_selesai_tugas, id_milestone: `${item.id_milestone}`, id_kategori: `${item.id_kategori}`, id_status: `${item.id_status}`, id_karyawan: `${item.id_karyawan}`
+    });
     }
   }
 
@@ -75,21 +81,21 @@ import { showConfirmDialog } from '../services/helpers';
 
   async function hapusTugas(i: number) {
   const y = await showConfirmDialog(`Data tugas akan dihapus permanen`);
-  if (y) {
-    try {
-      await api.deleteResource(`/api/tugas/${tugasList.value[i].id_tugas}`);
-      loadTugas();
-    } catch (err) {
-      console.log(err);
+    if (y) {
+      try {
+        await api.deleteResource(`/api/tugas/${tugasList.value[i].id_tugas}`);
+        loadTugas();
+      } catch (err) {
+        console.log(err);
+      }
     }
   }
-}
 
 /**
  * MOUNTED, LOAD DATA TUGAS
  */
 onMounted(async () => {
-  pilihMilestone.value = await api.getResource('/api/milestone');
+  loadMilestone();
   pilihKategori.value = await api.getResource('/api/kategori');
   pilihStatus.value = await api.getResource('/api/status');
   pilihKaryawan.value = await api.getResource('/api/karyawan');
@@ -99,7 +105,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <Parent/>
+  <Parent/>
 
   <!-- Main content -->
   <div class="main-content" id="panel">
@@ -137,10 +143,11 @@ onMounted(async () => {
               <h6 class="col h2 text-black d-inline-block mb-0">Data Tugas</h6>
             </div>
           </div>
+
           <div class="container">
             <div class="row align-items-center py-3">
-                <div class="col-lg-3">
-                <select class="form-control" id="id_milestone" v-model="id_milestone">
+              <div class="col-lg-3">
+                <select class="form-control" id="id_milestone">
                   <option value="">Pilih Milestone</option>
                   <option v-for="milestone in pilihMilestone" :key="milestone.id_milestone" :value="milestone.id_milestone"> {{ milestone.nama_milestone }} </option>
                 </select>
@@ -212,7 +219,7 @@ onMounted(async () => {
             </table>
           </div>
           <!-- Pagination Card footer -->
-           <!-- <Pagination :current-page="currentPage" :is-first-page="isFirstPage" :is-last-page="isLastPage" :goto-page="gotoPage" :next-page="nextPage" :prev-page="prevPage" :page-list="pageList"></Pagination> -->
+           <Pagination :current-page="currentPage" :is-first-page="isFirstPage" :is-last-page="isLastPage" :goto-page="gotoPage" :next-page="nextPage" :prev-page="prevPage" :page-list="pageList"></Pagination>
           <!-- End Pagination Card Footer -->
         </div>
       </div>
@@ -257,7 +264,6 @@ onMounted(async () => {
                       <select class="form-control" id="id_milestone" v-model="id_milestone">
                         <option value="">Pilih Milestone</option>
                         <option v-for="milestone in pilihMilestone" :key="milestone.id_milestone" :value="milestone.id_milestone"> {{ milestone.nama_milestone }} </option>
-                        
                       </select>
                     </div>
                   </div>
@@ -268,7 +274,7 @@ onMounted(async () => {
                   <div class="col-lg-6">
                     <div class="form-group">
                       <label class="form-control-label" for="keterangan">Keterangan</label>
-                      <textarea value="keterangan_tugas" id="keterangasn_tugas" class="form-control" placeholder="Masukkan Keterangan"></textarea>
+                      <textarea id="keterangasn_tugas" class="form-control" placeholder="Masukkan Keterangan"></textarea>
                     </div>
                   </div>
                   <div class="col-lg-2">
@@ -290,8 +296,8 @@ onMounted(async () => {
                     <div class="form-group">
                       <label class="form-control-label" for="status">Status Pengerjaan</label>
                       <select class="form-control" id="id_status" v-model="id_status">
-                        <option value="">Pilih Status Pengerjaan</option>
-                        <option v-for="status in pilihStatus" :key="status.id_status" :value="status.id_status"> {{ status.nama_statuskerja }} </option>
+                        <option value="">Pilih Status</option>
+                        <option v-for="status in pilihStatus" :key="status.id_status" :value="status.id_status"> {{ status.nama_status }} </option>
                       </select>
                     </div>
                   </div>
@@ -301,8 +307,8 @@ onMounted(async () => {
                     <div class="form-group">
                       <label class="form-control-label" for="kategori">Kategori Tugas</label>
                       <select class="form-control" id="id_kategori" v-model="id_kategori">
-                        <option value="">Pilih Kategori </option>
-                        <option v-for="kategori in pilihKategori" :key="kategori.id_kategori" :value="kategori.id_kategori"> {{ kategori.status_kategori }} </option>
+                        <option value="">Pilih Kategori</option>
+                        <option v-for="kategori in pilihKategori" :key="kategori.id_kategori" :value="kategori.id_kategori"> {{ kategori.nama_kategori }} </option>
                       </select>
                     </div>
                   </div>
