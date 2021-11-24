@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import * as yup from 'yup';
 import { useField, useForm } from 'vee-validate';
-import { onMounted, ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 import usePagination from '../composables/pagination';
 import Api from '../services/api';
 import { showConfirmDialog } from '../services/helpers';
@@ -14,7 +14,7 @@ import Pagination from '../components/pagination.vue';
     page: currentPage, isFirstPage, isLastPage, gotoPage,
     nextPage, prevPage } = usePagination('/api/berkas');
 
-    const pilihMilestone = ref<any[]>([]);
+    const { loadData: loadMilestone, result: pilihMilestone } = usePagination('/api/milestone');
 
     const isEditing = ref(false);
     const idBerkas = ref(0);
@@ -29,63 +29,75 @@ import Pagination from '../components/pagination.vue';
     });
 
     const { value: nama_berkas } = useField('nama_berkas');
-    const { value: keterangan } = useField('keterangan');
+    const { value: keterangan } = useField<string>('keterangan');
     const { value: file } = useField('file');
     const { value: tgl_upload } = useField('tgl_upload');
     const { value: id_milestone } = useField<string>('id_milestone');
 
+
     const pilihFile = ref();
 
     function editBerkas(i?: number) {
-    idBerkas.value = 0;
-    isEditing.value = true;
-        // kalau sedang mengedit
-        if (i !== undefined) {
+      idBerkas.value = 0;
+      isEditing.value = true;
+      setValues({ nama_berkas: '', keterangan: '', file: '', tgl_upload: '', id_milestone: '' });
+      // kalau sedang mengedit
+      if (i !== undefined) {
         const item = berkasList.value[i];
         idBerkas.value = item.id_berkas;
-        setValues({ ...item });
-        }
+        setValues({ 
+          nama_berkas: item.nama_berkas, keterangan: item.keterangan, file: item.file, tgl_upload: item.tgl_upload, id_milestone: `${item.id_milestone}`
+        });
+      }
     }
 
     function kembali() {
-        isEditing.value = false;
+      isEditing.value = false;
         resetForm();
     }
 
     async function simpanBerkas() {
     let url = '/api/berkas';
-        if (idBerkas.value > 0) {
-        url += `/${idBerkas.value}`;
-        }
-        try {
-        await api.postResourceFile(url, { 
-            nama_berkas: nama_berkas.value, keterangan: keterangan.value, file: file.value, tgl_upload: tgl_upload.value, id_milestone: id_milestone.value
-        }, idBerkas.value > 0 ? 'PUT' : 'POST');
-        isEditing.value = false;
-        resetForm();
-        loadBerkas();
-        } catch (err) {
-        console.log(err);
-        }
+      if (idBerkas.value > 0) {
+      url += `/${idBerkas.value}`;
+      }
+      try {
+      if(file.value == 'object'){
+
+      }else{
+        const fd = new FormData();
+        berkasList.value.forEach((berkas, key) => {
+         if(Object.prototype.hasOwnProperty.call(berkas, key)){
+            fd.append(key, berkas[key]);
+          }
+        });
+        const data = await api.postResourceFile(url, fd, idBerkas.value > 0 ? 'PUT' : 'POST');
+      }
+      isEditing.value = false;
+      resetForm();
+      loadBerkas();
+      } catch (err) {
+      console.log(err);
+      }
     }
 
     async function hapusBerkas(i: number) {
     const y = await showConfirmDialog(`Data berkas akan dihapus permanen`);
-        if (y) {
-            try {
-            await api.deleteResource(`/api/berkas/${berkasList.value[i].id_berkas}`);
-            loadBerkas();
-            } catch (err) {
-            console.log(err);
-            }
+      if (y) {
+        try {
+          await api.deleteResource(`/api/berkas/${berkasList.value[i].id_berkas}`);
+          loadBerkas();
+        } catch (err) {
+          console.log(err);
         }
-        }
+      }
+    }
 
     /**
      * MOUNTED, LOAD DATA TUGAS
      */
     onMounted(async () => {
-    pilihMilestone.value = await api.getResource('/api/milestone');
+    loadMilestone();
     loadBerkas();
     });
 
@@ -173,22 +185,20 @@ import Pagination from '../components/pagination.vue';
                         <thead class="thead-light">
                             <tr>
                                 <th scope="col">No</th>
-                                <th scope="col">Nama Berkas</th>
-                                <th scope="col">File</th>
-                                <th scope="col">Keterangan</th>
-                                <th scope="col">Milestone</th>
-                                <th scope="col">Tanggal Upload</th>
+                                <th scope="col">Berkas</th>
                                 <th scope="col">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="list">
                           <tr v-for="(berkas, i) in berkasList" :key="i">
                             <th scope="row">{{ i+1 }}</th>
-                            <td scope="row">{{ berkas.nama_berkas }}</td>
-                            <td scope="row">{{ berkas.file }}</td>
-                            <td scope="row">{{ berkas.keterangan }}</td>
-                            <td scope="row">{{ berkas.nama_milestone }}</td>
-                            <td scope="row">{{ berkas.tgl_upload }}</td>
+                            <td scope="row">
+                              <span>
+                                <span class="badge badge-success fs-5 font-weight-bolder mr-3" title="tanggal mulai">{{ berkas.tgl_upload.split('-').reverse().join('/') }}</span>
+                                <span class="badge badge-secondary">{{ berkas.keterangan }}</span>
+                              </span>
+                              <h4>{{ berkas.file }} </h4> <p> {{ berkas.nama_milestone }} </p>
+                            </td>
                             <td>
                               <button class="btn btn-primary" @click="editBerkas(i)">Edit</button>
                               <button class="btn btn-danger" @click="hapusBerkas(i)">Hapus</button>

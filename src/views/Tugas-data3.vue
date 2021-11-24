@@ -36,7 +36,7 @@ import Pagination from '../components/pagination.vue';
    });
 
   const { value: nama_tugas } = useField('nama_tugas');
-  const { value: keterangan_tugas } = useField('keterangan_tugas');
+  const { value: keterangan_tugas } = useField<string>('keterangan_tugas');
   const { value: tgl_mulai_tugas } = useField('tgl_mulai_tugas');
   const { value: tgl_selesai_tugas } = useField('tgl_selesai_tugas');
   const { value: id_milestone } = useField<string>('id_milestone');
@@ -47,6 +47,7 @@ import Pagination from '../components/pagination.vue';
   function editTugas(i?: number) {
   idTugas.value = 0;
   isEditing.value = true;
+  setValues({nama_tugas: '', keterangan_tugas: '', tgl_mulai_tugas: '', tgl_selesai_tugas: '', id_milestone: '', id_kategori: '', id_status: '', id_karyawan: ''});
     // kalau sedang mengedit
     if (i !== undefined) {
       const item = tugasList.value[i];
@@ -147,7 +148,7 @@ onMounted(async () => {
           <div class="container">
             <div class="row align-items-center py-3">
               <div class="col-lg-3">
-                <select class="form-control" id="id_milestone">
+                <select wire:model="paginate" class="form-control" id="id_milestone">
                   <option value="">Pilih Milestone</option>
                   <option v-for="milestone in pilihMilestone" :key="milestone.id_milestone" :value="milestone.id_milestone"> {{ milestone.nama_milestone }} </option>
                 </select>
@@ -188,28 +189,29 @@ onMounted(async () => {
               <thead class="thead-light">
                   <tr>
                       <th scope="col">No</th>
-                      <th scope="col">Nama</th>
-                      <th scope="col">Keterangan</th>
-                      <th scope="col">Tanggal Mulai</th>
-                      <th scope="col">Tanggal Selesai</th>
-                      <th scope="col">Milestone</th>
-                      <th scope="col">Status</th>
-                      <th scope="col">Kategori</th>
-                      <th scope="col">Penanggung Jawab</th>
+                      <th scope="col">Tugas</th>
                       <th scope="col">Aksi</th>
                   </tr>
               </thead>
               <tbody class="list" v-for="(tugas, i) in tugasList" :key="i">
                 <tr>
                   <th scope="row">{{ i+1 }}</th>
-                  <td scope="row">{{ tugas.nama_tugas }}</td>
-                  <td scope="row">{{ tugas.keterangan_tugas }}</td>
-                  <td scope="row">{{ tugas.tgl_mulai_tugas }}</td>
-                  <td scope="row">{{ tugas.tgl_selesai_tugas }}</td>
-                  <td scope="row">{{ tugas.nama_milestone }}</td>
-                  <td scope="row">{{ tugas.nama_statuskerja }}</td>
-                  <td scope="row">{{ tugas.status_kategori }}</td>
-                  <td scope="row">{{ tugas.nama_karyawan }}</td>
+                  <td scope="row">
+                    <div class="row">
+                      <div class="col">
+                        <span>
+                          <span class="badge badge-warning mr-3">{{ tugas.status_kategori }} </span>
+                          <span class="badge badge-success fs-5 font-weight-bolder" title="tanggal mulai">{{ tugas.tgl_mulai_tugas.split('-').reverse().join('/') }}</span> - <span title="tanggal_selesai" class="badge badge-danger font-weight-bolder mr-3">{{ tugas.tgl_selesai_tugas.split('-').reverse().join('/') }}</span>
+                          <i class="fas fa-user mr-3">{{ tugas.nama_karyawan }}</i> 
+                          <span class="badge badge-info">{{ tugas.nama_statuskerja }}</span>
+                        </span>
+                        <h4 class="mr-3">{{ tugas.nama_tugas }} 
+                          <span class="badge badge-secondary">{{ tugas.keterangan_tugas }}</span>
+                        </h4> 
+                        <p>{{ tugas.nama_milestone }}</p>
+                      </div>
+                    </div>
+                  </td>
                   <td>
                   <button class="btn btn-primary" @click="editTugas(i)">Edit</button>
                   <button class="btn btn-danger" @click="hapusTugas(i)">Hapus</button>
@@ -221,6 +223,7 @@ onMounted(async () => {
           <!-- Pagination Card footer -->
            <Pagination :current-page="currentPage" :is-first-page="isFirstPage" :is-last-page="isLastPage" :goto-page="gotoPage" :next-page="nextPage" :prev-page="prevPage" :page-list="pageList"></Pagination>
           <!-- End Pagination Card Footer -->
+          
         </div>
       </div>
     </div>
@@ -274,7 +277,7 @@ onMounted(async () => {
                   <div class="col-lg-6">
                     <div class="form-group">
                       <label class="form-control-label" for="keterangan">Keterangan</label>
-                      <textarea id="keterangasn_tugas" class="form-control" placeholder="Masukkan Keterangan"></textarea>
+                      <textarea v-model="keterangan_tugas" id="keterangan_tugas" class="form-control" placeholder="Masukkan Keterangan"></textarea>
                     </div>
                   </div>
                   <div class="col-lg-2">
@@ -297,7 +300,7 @@ onMounted(async () => {
                       <label class="form-control-label" for="status">Status Pengerjaan</label>
                       <select class="form-control" id="id_status" v-model="id_status">
                         <option value="">Pilih Status</option>
-                        <option v-for="status in pilihStatus" :key="status.id_status" :value="status.id_status"> {{ status.nama_status }} </option>
+                        <option v-for="status in pilihStatus" :key="status.id_status" :value="status.id_status"> {{ status.nama_statuskerja }} </option>
                       </select>
                     </div>
                   </div>
@@ -308,7 +311,7 @@ onMounted(async () => {
                       <label class="form-control-label" for="kategori">Kategori Tugas</label>
                       <select class="form-control" id="id_kategori" v-model="id_kategori">
                         <option value="">Pilih Kategori</option>
-                        <option v-for="kategori in pilihKategori" :key="kategori.id_kategori" :value="kategori.id_kategori"> {{ kategori.nama_kategori }} </option>
+                        <option v-for="kategori in pilihKategori" :key="kategori.id_kategori" :value="kategori.id_kategori"> {{ kategori.status_kategori }} </option>
                       </select>
                     </div>
                   </div>

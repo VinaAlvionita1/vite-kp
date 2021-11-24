@@ -25,14 +25,14 @@ const idProyek = ref(0);
 
 const { setValues, meta: metaForm, resetForm } = useForm({
   validationSchema: yup.object({
-    nomor_proyek: yup.string().required().min(3).max(60),
-    nama_proyek: yup.string().required().min(3).max(60),
-    lokasi: yup.string().required().min(3).max(60),
-    dinas: yup.string().required().min(3).max(60),
-    thn_anggaran: yup.number().required().min(1970).max(4000),
-    harga: yup.number().required().min(1),
-    tgl_mulai_proyek: yup.string().required().min(2).max(10),
-    tgl_selesai_proyek: yup.string().required().min(2).max(10),
+    nomor_proyek: yup.string().required().min(3).max(100),
+    nama_proyek: yup.string().required().min(3).max(100),
+    lokasi: yup.string().required().min(3).max(100),
+    dinas: yup.string().required().min(3).max(100),
+    thn_anggaran: yup.number().required().min(2).max(4000),
+    harga: yup.number().required().min(3).max(60),
+    tgl_mulai_proyek: yup.string().required().min(10).max(10),
+    tgl_selesai_proyek: yup.string().required().min(10).max(10),
   })
 });
 

@@ -47,16 +47,6 @@ export default function usePagination(path: string, query?: Ref) {
     }
   }
 
-  // async function loadMilestone() {
-  //   let q = `?page=${page.value}`;
-  //   const d = await api.getResource(path + q);
-  //   for(let q=d.current_page; q<=d.total; q++){
-  //     if (d.data) {
-  //       result.value = d.data;
-  //     }
-  //   }
-  // }
-
   const isFirstPage = computed(() => page.value == 1);
   const isLastPage = computed(() => page.value == count.value);
 

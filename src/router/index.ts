@@ -1,12 +1,12 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router"
-import Home from "../views/Home.vue"
+import Home from "../views/Home3.vue"
 import Login from "../views/Login.vue"
 import Karyawan from "../views/Karyawan3.vue"
 import Proyek from "../views/Proyek3.vue"
-import Tugas from "../views/Tugas.vue"
+import Tugas from "../views/Tugas3.vue"
 import DataTugas from "../views/Tugas-data3.vue"
 import Berkas from "../views/Berkas3.vue"
-import Milestone from "../views/Milestone.vue"
+import Milestone from "../views/Milestone3.vue"
 
 const routes: Array<RouteRecordRaw> = [
     {
