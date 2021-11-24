@@ -10,6 +10,7 @@ import Child from './Child.vue';
 import Pagination from '../components/pagination.vue';
 
     const api: Api = new Api();
+    const milestone = ref('');
     const { loadData: loadBerkas, result: berkasList, pages: pageList,
     page: currentPage, isFirstPage, isLastPage, gotoPage,
     nextPage, prevPage } = usePagination('/api/berkas');
@@ -18,35 +19,38 @@ import Pagination from '../components/pagination.vue';
 
     const isEditing = ref(false);
     const idBerkas = ref(0);
+    const file = ref<any>('');
     const { setValues, meta: metaForm, resetForm } = useForm({
-        validationSchema: yup.object({
+      validationSchema: yup.object({
         nama_berkas: yup.string().required().min(3).max(80),
-        file: yup.string().required().min(4).max(2550),
         keterangan: yup.string().required().min(10).max(1000),
         tgl_upload: yup.string().required().min(10).max(10),
         id_milestone: yup.string().required().min(1).max(3)
-        })
+      })
     });
 
-    const { value: nama_berkas } = useField('nama_berkas');
+    const { value: nama_berkas } = useField<string>('nama_berkas');
     const { value: keterangan } = useField<string>('keterangan');
-    const { value: file } = useField('file');
-    const { value: tgl_upload } = useField('tgl_upload');
+    const { value: tgl_upload } = useField<string>('tgl_upload');
     const { value: id_milestone } = useField<string>('id_milestone');
 
 
-    const pilihFile = ref();
+    function pilihFile(evt: any) {
+      if (evt.target?.files) {
+        file.value = evt.target.files[0];
+      }
+    }
 
     function editBerkas(i?: number) {
       idBerkas.value = 0;
       isEditing.value = true;
-      setValues({ nama_berkas: '', keterangan: '', file: '', tgl_upload: '', id_milestone: '' });
+      setValues({ nama_berkas: '', keterangan: '', tgl_upload: '', id_milestone: '' });
       // kalau sedang mengedit
       if (i !== undefined) {
         const item = berkasList.value[i];
         idBerkas.value = item.id_berkas;
         setValues({ 
-          nama_berkas: item.nama_berkas, keterangan: item.keterangan, file: item.file, tgl_upload: item.tgl_upload, id_milestone: `${item.id_milestone}`
+          nama_berkas: item.nama_berkas, keterangan: item.keterangan, tgl_upload: item.tgl_upload, id_milestone: `${item.id_milestone}`
         });
       }
     }
@@ -57,27 +61,39 @@ import Pagination from '../components/pagination.vue';
     }
 
     async function simpanBerkas() {
-    let url = '/api/berkas';
+      let url = '/api/berkas';
       if (idBerkas.value > 0) {
-      url += `/${idBerkas.value}`;
+        url += `/${idBerkas.value}`;
       }
       try {
-      if(file.value == 'object'){
+        if (file.value !== undefined && typeof(file.value) != 'string') {
+          const fd = new FormData();
+          fd.append('nama_berkas', nama_berkas.value);
+          fd.append('keterangan', keterangan.value);
+          fd.append('tgl_upload', tgl_upload.value);
+          fd.append('id_milestone', id_milestone.value);
+          fd.append('berkas', file.value);
+          const data = await api.postResourceFile(url, fd, idBerkas.value > 0 ? 'PUT' : 'POST');
+        } else {
 
-      }else{
-        const fd = new FormData();
-        berkasList.value.forEach((berkas, key) => {
-         if(Object.prototype.hasOwnProperty.call(berkas, key)){
-            fd.append(key, berkas[key]);
-          }
-        });
-        const data = await api.postResourceFile(url, fd, idBerkas.value > 0 ? 'PUT' : 'POST');
-      }
-      isEditing.value = false;
-      resetForm();
-      loadBerkas();
+        }
+        // console.log(file.value);
+        // if(file.value == 'object'){
+
+        // }else{
+        //   const fd = new FormData();
+        //   berkasList.value.forEach((berkas, key) => {
+        //   if(Object.prototype.hasOwnProperty.call(berkas, key)){
+        //       fd.append(key, berkas[key]);
+        //     }
+        //   });
+        //   const data = await api.postResourceFile(url, fd, idBerkas.value > 0 ? 'PUT' : 'POST');
+        // }
+        isEditing.value = false;
+        resetForm();
+        loadBerkas();
       } catch (err) {
-      console.log(err);
+        console.log(err);
       }
     }
 
@@ -147,7 +163,7 @@ import Pagination from '../components/pagination.vue';
                 <div class="container">
                   <div class="row align-items-center py-3">
                      <div class="col-lg-3">
-                      <select class="form-control" id="id_milestone">
+                      <select class="form-control" v-model="milestone" id="id_milestone">
                         <option value="">Pilih Milestone</option>
                         <option v-for="milestone in pilihMilestone" :key="milestone.id_milestone" :value="milestone.id_milestone"> {{ milestone.nama_milestone }} </option>
                       </select>
@@ -252,7 +268,6 @@ import Pagination from '../components/pagination.vue';
                     <div class="col-lg-5">
                       <div class="form-group">
                         <label class="form-control-label" for="file">File</label><br>
-                        {{ file }}
                         <input type="file" id="file" @change="pilihFile($event)" class="form-control" placeholder="Masukkan Nama Berkas"> 
                       </div>
                     </div>
@@ -263,7 +278,7 @@ import Pagination from '../components/pagination.vue';
                         <label class="form-control-label" for="id_milestone">Milestone</label>
                         <select class="form-control" id="id_milestone" v-model="id_milestone">
                           <option value="">Pilih Milestone</option>
-                          <option v-for="milestone in pilihMilestone" :key="milestone.id_milestone" :value="milestone.id_milestone"> {{ milestone.nama_milestone }} </option>
+                          <option v-for="milestone in pilihMilestone" :key="milestone.id_milestone" :value="`${milestone.id_milestone}`"> {{ milestone.nama_milestone }} </option>
                         </select>
                       </div>
                     </div>
@@ -291,7 +306,7 @@ import Pagination from '../components/pagination.vue';
                     
                     </div>
                     <div class="col-lg-11 text-right">
-                      <a class="btn btn-success" @click="simpanBerkas()">SIMPAN</a>
+                      <button type="button" class="btn btn-success" :disabled=" ! metaForm.valid" @click="simpanBerkas()">SIMPAN</button>
                       <a class="btn btn-primary" @click="kembali()">KEMBALI</a>
                     </div>
                   </div>
