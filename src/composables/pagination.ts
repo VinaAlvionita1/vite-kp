@@ -1,16 +1,16 @@
-import { computed, Ref, ref } from 'vue'
-import Api from '../services/api';
+import { computed, ref } from 'vue'
 import { range } from '../services/helpers';
+import Api from '../services/api';
 
-export default function usePagination(path: string, query?: Ref) {
+export default function usePagination(path: string, limit: number, param?: any) {
+  const api = new Api();
+  const result = ref<any[]>([]);
   const page = ref(1);
   const start = ref(0);
   const end = ref(0);
   const count = ref(0);
   const pages = ref<number[]>([]);
-  const api: Api = new Api();
-  const result = ref<any[]>([]);
-  const error = ref<any>();
+  const number = ref(0);
 
   function generate(totalItems: number, currentPage?: number) {
     page.value = currentPage || 1;
@@ -31,20 +31,13 @@ export default function usePagination(path: string, query?: Ref) {
       }
     }
     pages.value = range(`${start.value},${end.value + 1}`);
+    number.value = (page.value - 1) * limit;
   }
 
   async function loadData() {
-    let q = `?page=${page.value}`;
-    if (query !== undefined) {
-      q += `&query=${query.value}`;
-    }
-    const d = await api.getResource(path + q);
-    if (d.data) {
-      result.value = d.data;
-      generate(Math.ceil(d.total / d.per_page), d.current_page);
-    } else {
-      result.value = d;
-    }
+    const respon = await api.getResource(path, { limit: limit, page: page.value });
+    result.value = respon.data;
+    generate(respon.last_page, page.value);
   }
 
   const isFirstPage = computed(() => page.value == 1);
@@ -81,8 +74,8 @@ export default function usePagination(path: string, query?: Ref) {
   }
 
   return {
-    page, start, end, count, pages, isFirstPage, isLastPage, result,
-    loadData, prevPage, gotoPage, nextPage, firstPage, lastPage,
+    page, start, end, count, pages, isFirstPage, isLastPage, result, number,
+    loadData, prevPage, gotoPage, nextPage, firstPage, lastPage
   }
 
 }

@@ -1,3 +1,5 @@
+import qs from 'qs';
+
 export default class Api {
     private host = 'http://localhost:8181'
 
@@ -5,15 +7,19 @@ export default class Api {
         return this.host;
     }
 
-    getResource(path: string): Promise<any> {
+    getResource(path: string, params: any = null): Promise<any> {
         return new Promise(async (resolve, reject)=>{
             try{
               const headers: any = {};
               const token = localStorage.getItem('token');
               if (token){
                 headers['Authorization'] = 'Bearer ' + token;
-              } 
-              const response = await fetch(this.host + path,{
+              }
+              let url = `${this.host}${path}`;
+              if (params) {
+                url += '?' + qs.stringify(params);
+              }
+              const response = await fetch(url,{
                 headers: headers
               });
               const data = await response.json();

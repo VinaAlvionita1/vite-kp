@@ -13,9 +13,9 @@ import Pagination from '../components/pagination.vue';
     const milestone = ref('');
     const { loadData: loadBerkas, result: berkasList, pages: pageList,
     page: currentPage, isFirstPage, isLastPage, gotoPage,
-    nextPage, prevPage } = usePagination('/api/berkas');
+    nextPage, prevPage } = usePagination('/api/berkas', 1);
 
-    const { loadData: loadMilestone, result: pilihMilestone } = usePagination('/api/milestone');
+    const { loadData: loadMilestone, result: pilihMilestone } = usePagination('/api/milestone', 30);
 
     const isEditing = ref(false);
     const idBerkas = ref(0);
@@ -101,8 +101,8 @@ import Pagination from '../components/pagination.vue';
      * MOUNTED, LOAD DATA TUGAS
      */
     onMounted(async () => {
-    loadMilestone();
-    loadBerkas();
+      loadMilestone();
+      loadBerkas();
     });
 
 </script>
