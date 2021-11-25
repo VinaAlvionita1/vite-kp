@@ -57,7 +57,7 @@ import Pagination from '../components/pagination.vue';
 
     function kembali() {
       isEditing.value = false;
-        resetForm();
+      resetForm();
     }
 
     async function simpanBerkas() {
@@ -72,23 +72,11 @@ import Pagination from '../components/pagination.vue';
           fd.append('keterangan', keterangan.value);
           fd.append('tgl_upload', tgl_upload.value);
           fd.append('id_milestone', id_milestone.value);
-          fd.append('berkas', file.value);
+          fd.append('file', file.value);
           const data = await api.postResourceFile(url, fd, idBerkas.value > 0 ? 'PUT' : 'POST');
         } else {
-
+          const data = await api.postResource(url, { nama_berkas: nama_berkas.value, keterangan: keterangan.value, tgl_upload: tgl_upload.value, id_milestone: id_milestone.value, file: file.value },idBerkas.value > 0 ? 'PUT' : 'POST');
         }
-        // console.log(file.value);
-        // if(file.value == 'object'){
-
-        // }else{
-        //   const fd = new FormData();
-        //   berkasList.value.forEach((berkas, key) => {
-        //   if(Object.prototype.hasOwnProperty.call(berkas, key)){
-        //       fd.append(key, berkas[key]);
-        //     }
-        //   });
-        //   const data = await api.postResourceFile(url, fd, idBerkas.value > 0 ? 'PUT' : 'POST');
-        // }
         isEditing.value = false;
         resetForm();
         loadBerkas();

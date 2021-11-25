@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import Parent from './Parent.vue';
 import Child from './Child.vue';
+import usePagination from '../composables/pagination';
+import { onMounted } from 'vue';
+
+const { loadData: loadProyek, result: ProyekList } = usePagination('/api/proyek');
+
+onMounted(()=>{
+  loadProyek();
+});
 
 </script>
 
@@ -40,7 +48,7 @@ import Child from './Child.vue';
           <div class="card">
             <!-- Card header -->
             <div class="card-header border-0">
-              <h3 class="mb-0">Data Milestone</h3>
+              <h3 class="mb-0">Data Proyek</h3>
             </div>
 
             <!-- Isi Content View -->
