@@ -1,27 +1,30 @@
 <script setup lang="ts">
 import Parent from './Parent.vue';
 import Child from './Child.vue';
-import usePagination from '../composables/pagination';
-import { onMounted, ref } from 'vue';
+import Api from '../services/api';
+import { onMounted, ref, watch } from 'vue';
 
+const api: Api = new Api();
+const proyekList = ref<any[]>([]);
 const query = ref('');
-const { loadData: loadproyek, result: proyekList } = usePagination('/api/proyek', 30, query);
 
-const { loadData: loadMilestone, result: pilihMilestone } = usePagination('/api/milestone', 30, query);
+const milestoneList = ref<any[]>([]);
 
+async function loadMilestone() {
+  const d = await api.getResource('/api/milestone', { limit: 30, page: 1, query: query.value });
+  milestoneList.value = d.data;
+};
 onMounted(async () => {
-  loadproyek();
-  loadMilestone();
+  const data = await api.getResource('/api/proyek', { limit: 30, page: 1 });
+  proyekList.value = data.data;
 });
 
 </script>
 
 <template>
-  <Parent/>
+  <Parent></Parent>
 
-  <!-- Main content -->
   <div class="main-content" id="panel">
-    
     <!-- Header -->
     <div class="header bg-primary pb-6">
       <div class="container-fluid">
@@ -42,76 +45,36 @@ onMounted(async () => {
       </div>
     </div>
     <!-- End Header -->
-    
-    <!-- Page content -->
+
     <div class="container-fluid mt--6">
-
-    <!-- Isi View -->
-    <div class="row">
-        <div class="col">
-          <div class="card">
-            <!-- Card header -->
-            <br>
-            <form class="col-lg-12">
-              <div class="col-lg-3">
-                <select class="form-control" id="id_milestone" @click="loadproyek()" v-model="query">
-                  <option value="">Pilih Proyek</option>
-                  <option v-for="proyek in proyekList" :key="proyek.id_proyek" :value="proyek.id_proyek"> {{ proyek.nama_proyek }} </option>
-                </select>
-              </div>
-            </form>
-            <div class="card-header border-0">
-              <h3 class="mb-0 align-items-center">Data Milestone</h3>
+      <div class="col">
+        <div class="card">
+          <form class="col-lg-12">
+            <div class="col-lg-3">
+              <select class="form-control" id="id_milestone" v-model="query" @change="loadMilestone">
+                <option value="">Pilih Proyek</option>
+                <option v-for="proyek in proyekList" :key="proyek.id_proyek" :value="proyek.id_proyek"> {{ proyek.nama_proyek }} </option>
+              </select>
             </div>
-
-            <!-- Isi Content View -->
-            <div v-for="milestone in pilihMilestone">
-              <div class="d-flex justify-content-center" v-if="milestone.id_proyek = query">
-                <div class="p-2">{{ milestone.nama_milestone }}</div>
-              </div>
-              <!-- <div class="d-flex justify-content-center">
-                <div class="p-2">milestone 1</div>
-                <div class="p-2">milestone 2</div>
-              </div> -->
+          </form>
+          <div class="card-header border-0">
+            <h3 class="mb-0 align-items-center">Data Milestone</h3>
+          </div>
+          <div v-for="milestone in milestoneList">
+            <div class="d-flex justify-content-center">
+              <div class="p-2">{{ milestone.nama_milestone }}</div>
             </div>
-            <br>
-            <div class="container mx-5">
-              <ul>
-                  <div class="row d-flex justify-content-around">
-                    <div class="col">
-                        <li>Merah = Pengerjaan 0%</li>
-                    </div>
-                    <div class="col">
-                        <li>Kuning = Pengerjaan 50%</li>
-                    </div>
-                    <div class="col">
-                        <li>Hijau = Pengerjaan 100%</li>
-                    </div>
-                  </div>
-              </ul>
-            </div>
-
+            <!-- <div class="d-flex justify-content-center">
+              <div class="p-2">milestone 1</div>
+              <div class="p-2">milestone 2</div>
+            </div> -->
           </div>
         </div>
       </div>
-      <!-- End Isi View -->
-
-      <!-- Footer -->
-      <Child/>
+      <Child></Child>
       <!-- End Footer -->
     </div>
     <!-- End Page Content -->
   </div>
   <!-- End Main Content -->
 </template>
-
-<style scoped>
-.p-2 {
-   background: red;
-   padding-bottom: 100%;
-}
-
-.col-md{
-    margin-top: 10px;
-}
-</style>
