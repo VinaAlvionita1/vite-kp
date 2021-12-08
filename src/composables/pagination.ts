@@ -1,8 +1,10 @@
 import { computed, ref } from 'vue'
 import { range } from '../services/helpers';
 import Api from '../services/api';
+import { Console } from 'console';
+import { request } from 'https';
 
-export default function usePagination(path: string, limit: number, param?: any) {
+export default function usePagination(path: string, limit: number, query?: any) {
   const api = new Api();
   const result = ref<any[]>([]);
   const page = ref(1);
@@ -35,7 +37,19 @@ export default function usePagination(path: string, limit: number, param?: any) 
   }
 
   async function loadData() {
-    const respon = await api.getResource(path, { limit: limit, page: page.value });
+    const respon = await api.getResource(path, { limit: limit, page: page.value, query: query.value });
+    if(query == query.value){
+      result.value = respon.data.query;
+    }
+    result.value = respon.data;
+    generate(respon.last_page, page.value);
+  }
+
+  async function loadKaryawan() {
+    const respon = await api.getResource(path);
+    if(query == query.value){
+      result.value = respon.data.query;
+    }
     result.value = respon.data;
     generate(respon.last_page, page.value);
   }
@@ -74,7 +88,7 @@ export default function usePagination(path: string, limit: number, param?: any) 
   }
 
   return {
-    page, start, end, count, pages, isFirstPage, isLastPage, result, number,
+    page, start, end, count, pages, isFirstPage, isLastPage, result, number, loadKaryawan,
     loadData, prevPage, gotoPage, nextPage, firstPage, lastPage
   }
 

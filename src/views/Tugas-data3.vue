@@ -9,16 +9,17 @@ import * as yup from 'yup';
 import { showConfirmDialog } from '../services/helpers';
 import Pagination from '../components/pagination.vue';
 
+  const query = ref<number>();
   const api: Api = new Api();
   const { loadData: loadTugas, result: tugasList, pages: pageList,
   page: currentPage, isFirstPage, isLastPage, gotoPage,
-  nextPage, prevPage } = usePagination('/api/tugas');
+  nextPage, prevPage } = usePagination('/api/tugas', 2, query);
 
-  const { loadData: loadMilestone, result: pilihMilestone } = usePagination('/api/milestone');
+  const { loadData: loadMilestone, result: pilihMilestone } = usePagination('/api/milestone', 30, query);
+  const { loadData: loadKaryawan, result: pilihKaryawan } = usePagination('/api/karyawan', 30, query);
 
   const pilihKategori = ref<any[]>([]);
   const pilihStatus = ref<any[]>([]);
-  const pilihKaryawan = ref<any[]>([]);
 
   const isEditing = ref(false);
   const idTugas = ref(0);
@@ -99,7 +100,7 @@ onMounted(async () => {
   loadMilestone();
   pilihKategori.value = await api.getResource('/api/kategori');
   pilihStatus.value = await api.getResource('/api/status');
-  pilihKaryawan.value = await api.getResource('/api/karyawan');
+  loadKaryawan();
   loadTugas();
 });
 
@@ -147,12 +148,14 @@ onMounted(async () => {
 
           <div class="container">
             <div class="row align-items-center py-3">
-              <div class="col-lg-3">
-                <select wire:model="paginate" class="form-control" id="id_milestone">
-                  <option value="">Pilih Milestone</option>
-                  <option v-for="milestone in pilihMilestone" :key="milestone.id_milestone" :value="milestone.id_milestone"> {{ milestone.nama_milestone }} </option>
-                </select>
-              </div>
+              <form class="col-lg-12">
+                <div class="col-lg-3">
+                  <select class="form-control" id="id_milestone" @click="loadTugas()" v-model="query">
+                    <option value="">Pilih Milestone</option>
+                    <option v-for="milestone in pilihMilestone" :key="milestone.id_milestone" :value="milestone.id_milestone"> {{ milestone.nama_milestone }} </option>
+                  </select>
+                </div>
+              </form>
             </div>
           </div>
           <!-- End Card Header -->

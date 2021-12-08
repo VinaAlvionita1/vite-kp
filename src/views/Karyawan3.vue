@@ -8,8 +8,9 @@ import { useField, useForm } from 'vee-validate';
 import * as yup from 'yup';
 import { showConfirmDialog } from '../services/helpers';
 
+const query = ref('');
 const api: Api = new Api();
-const { loadData, result: karyawanList } = usePagination('/api/karyawan');
+const { loadData, result: karyawanList } = usePagination('/api/karyawan', 30, query);
 
 const pilihJabatan = ref<any[]>([]);
 

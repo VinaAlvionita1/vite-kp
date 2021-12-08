@@ -2,9 +2,37 @@
 import Parent from './Parent.vue';
 import Child from './Child.vue';
 import usePagination from '../composables/pagination';
-import { onMounted } from 'vue';
+import { onMounted, ref, reactive } from 'vue';
 
-const { loadData: loadMilestone, result: pilihMilestone } = usePagination('/api/milestone');
+const query = ref('');
+const { loadData: loadMilestone, result: pilihMilestone } = usePagination('/api/tugasGrafik', 30, query);
+
+const options = reactive({
+  chart: {
+    id: 'vuechart-example'
+  },
+  xaxis: {
+    categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998]
+  }
+});
+
+const series = reactive({
+  name: 'series-1',
+  data: [30, 40, 45, 50, 49, 60, 70, 91]
+});
+
+// options: {
+//   chart: {
+//     id: 'vuechart-example'
+//   },
+//   xaxis: {
+//     categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998]
+//   }
+// },
+// series: [{
+//   name: 'series-1',
+//   data: [30, 40, 45, 50, 49, 60, 70, 91]
+// }]
 
 onMounted(async()=>{
  loadMilestone();
@@ -81,7 +109,7 @@ onMounted(async()=>{
             </nav>
             <!-- End Navbar -->
             <div class="mx-auto">
-              <!-- <apexchart width="500" type="bar" :options="options" :series="series" /> -->
+              <apexchart width="500" type="bar" :options="options" :series="series" />
             </div>
           </div>
       </div>

@@ -15,7 +15,7 @@ const {
   loadData: loadProyek, result: proyekList, pages: pageList,
   page: currentPage, isFirstPage, isLastPage, gotoPage,
   nextPage, prevPage
-} = usePagination('/api/proyek', query);
+} = usePagination('/api/proyek', 2, query);
 
 /**
  * EDITING
@@ -31,8 +31,8 @@ const { setValues, meta: metaForm, resetForm } = useForm({
     dinas: yup.string().required().min(3).max(100),
     thn_anggaran: yup.number().required().min(2).max(4000),
     harga: yup.number().required().min(3).max(60),
-    tgl_mulai_proyek: yup.string().required().min(10).max(10),
-    tgl_selesai_proyek: yup.string().required().min(10).max(10),
+    tgl_mulai_proyek: yup.string().required().min(3).max(10),
+    tgl_selesai_proyek: yup.string().required().min(3).max(10),
   })
 });
 
@@ -291,7 +291,7 @@ onMounted(() => loadProyek());
                   
                   </div>
                   <div class="col-lg-11 text-right">
-                    <a href="" class="btn btn-success" :class="{ disabled: ! metaForm.valid }" @click="simpanProyek()" :disabled=" ! metaForm.valid">SIMPAN DATA</a>
+                    <a href="" class="btn btn-success" :class="{ disabled: ! metaForm.valid }" :disabled=" ! metaForm.valid" @click="simpanProyek()">SIMPAN DATA</a>
                     <a href="" class="btn btn-primary" @click.prevent="kembali()">KEMBALI</a>
                   </div>
                 </div>

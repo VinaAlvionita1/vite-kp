@@ -1,6 +1,18 @@
 <script setup lang="ts">
 import Parent from './Parent.vue';
 import Child from './Child.vue';
+import usePagination from '../composables/pagination';
+import { onMounted, ref } from 'vue';
+
+const query = ref('');
+const { loadData: loadproyek, result: proyekList } = usePagination('/api/proyek', 30, query);
+
+const { loadData: loadMilestone, result: pilihMilestone } = usePagination('/api/milestone', 30, query);
+
+onMounted(async () => {
+  loadproyek();
+  loadMilestone();
+});
 
 </script>
 
@@ -39,17 +51,30 @@ import Child from './Child.vue';
         <div class="col">
           <div class="card">
             <!-- Card header -->
+            <br>
+            <form class="col-lg-12">
+              <div class="col-lg-3">
+                <select class="form-control" id="id_milestone" @click="loadproyek()" v-model="query">
+                  <option value="">Pilih Proyek</option>
+                  <option v-for="proyek in proyekList" :key="proyek.id_proyek" :value="proyek.id_proyek"> {{ proyek.nama_proyek }} </option>
+                </select>
+              </div>
+            </form>
             <div class="card-header border-0">
-              <h3 class="mb-0">Data Milestone</h3>
+              <h3 class="mb-0 align-items-center">Data Milestone</h3>
             </div>
 
             <!-- Isi Content View -->
-            <div class="d-flex justify-content-center">
-              <div class="p-2">Milestone 1</div>
-              <div class="p-2">Milestone 2</div>
-              <div class="p-2">Milestone 3</div>
+            <div v-for="milestone in pilihMilestone">
+              <div class="d-flex justify-content-center" v-if="milestone.id_proyek = query">
+                <div class="p-2">{{ milestone.nama_milestone }}</div>
+              </div>
+              <!-- <div class="d-flex justify-content-center">
+                <div class="p-2">milestone 1</div>
+                <div class="p-2">milestone 2</div>
+              </div> -->
             </div>
-
+            <br>
             <div class="container mx-5">
               <ul>
                   <div class="row d-flex justify-content-around">
@@ -82,7 +107,7 @@ import Child from './Child.vue';
 
 <style scoped>
 .p-2 {
-   background: black;
+   background: red;
    padding-bottom: 100%;
 }
 

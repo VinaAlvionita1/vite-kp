@@ -16,7 +16,7 @@ import Child from './Child.vue';
     const pilihProyek = ref<any[]>([]);
     const { loadData: loadMilestone, result: milestoneList, pages: pageList,
     page: currentPage, isFirstPage, isLastPage, gotoPage,
-    nextPage, prevPage } = usePagination('/api/milestone', query);
+    nextPage, prevPage } = usePagination('/api/milestone', 2, query);
     const isEditing = ref(false);
     const idMilestone = ref(0);
 
@@ -130,7 +130,7 @@ import Child from './Child.vue';
               <div class="row align-items-center py-3">
                 <div class="col-lg-6">
                     <form class="form-inline ml-3">
-                        <input class="form-control mr-sm-1" @keyup="loadMilestone" v-model="query" type="search" placeholder="Cari..." aria-label="Search">
+                        <input class="form-control mr-sm-1" @keyup="loadMilestone()" v-model="query" type="search" placeholder="Cari..." aria-label="Search">
                     </form>
                 </div>
                 <div class="col-lg-6 text-right">
