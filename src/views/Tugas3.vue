@@ -5,34 +5,18 @@ import usePagination from '../composables/pagination';
 import { onMounted, ref, reactive } from 'vue';
 
 const query = ref('');
-const { loadData: loadMilestone, result: pilihMilestone } = usePagination('/api/tugasGrafik', 30, query);
+const { loadData: loadMilestone, result: pilihMilestone } = usePagination('/api/milestone', 30, query);
 
-const options = reactive({
-  chart: {
-    id: 'vuechart-example'
-  },
+const options = ref({
   xaxis: {
     categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998]
   }
 });
 
-const series = reactive({
+const series = ref({
   name: 'series-1',
   data: [30, 40, 45, 50, 49, 60, 70, 91]
 });
-
-// options: {
-//   chart: {
-//     id: 'vuechart-example'
-//   },
-//   xaxis: {
-//     categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998]
-//   }
-// },
-// series: [{
-//   name: 'series-1',
-//   data: [30, 40, 45, 50, 49, 60, 70, 91]
-// }]
 
 onMounted(async()=>{
  loadMilestone();

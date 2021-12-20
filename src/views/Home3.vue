@@ -3,20 +3,31 @@ import Parent from './Parent.vue';
 import Child from './Child.vue';
 import Api from '../services/api';
 import { onMounted, ref, watch } from 'vue';
+import usePagination from '../composables/pagination';
 
 const api: Api = new Api();
 const proyekList = ref<any[]>([]);
 const query = ref('');
+const index = ref(0);
 
 const milestoneList = ref<any[]>([]);
 
+// const { loadData: loadMilestone, result: pilihMilestone } = usePagination('/api/tugasGrafik', 30, query);
+const { loadData: loadProyek, result: pilihProyek } = usePagination('/api/proyek', 30, query);
+
 async function loadMilestone() {
-  const d = await api.getResource('/api/milestone', { limit: 30, page: 1, query: query.value });
-  milestoneList.value = d.data;
+  milestoneList.value = [];
+  if(query.value){
+    const d = await api.getResource('/api/tugasGrafik', { limit: 30, page: 1, query: query.value });
+    milestoneList.value = d.index;
+  }
+  // console.log(milestoneList.value);
 };
 onMounted(async () => {
-  const data = await api.getResource('/api/proyek', { limit: 30, page: 1 });
-  proyekList.value = data.data;
+  // const data = await api.getResource('/api/proyek', { limit: 30, page: 1 });
+  // proyekList.value = data.data;
+  loadMilestone();
+  loadProyek();
 });
 
 </script>
@@ -53,7 +64,7 @@ onMounted(async () => {
             <div class="col-lg-3">
               <select class="form-control" id="id_milestone" v-model="query" @change="loadMilestone">
                 <option value="">Pilih Proyek</option>
-                <option v-for="proyek in proyekList" :key="proyek.id_proyek" :value="proyek.id_proyek"> {{ proyek.nama_proyek }} </option>
+                <option v-for="proyek in pilihProyek" :key="proyek.id_proyek" :value="proyek.id_proyek"> {{ proyek.nama_proyek }} </option>
               </select>
             </div>
           </form>
