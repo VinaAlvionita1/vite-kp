@@ -67,7 +67,7 @@
             </nav>
             <!-- End Navbar -->
             <div id="chart">
-              <apexchart v-if="ganchart.length > 0" type="rangeBar" height="350" :options="data.chartOptions" :series="ganchart"></apexchart>
+              <apexchart v-if="doneLoad" type="rangeBar" height="350" :options="data.chartOptions" :series="ganchart"></apexchart>
             </div>
           </div>
       </div>
@@ -93,71 +93,41 @@ export default defineComponent({
       query: '',
       pilihMilestone: [] as { id_milestone: number, nama_milestone: string }[],
       milestone: '',
-      ganchart: [],
-      gant: '',
+      ganchart: [] as { data: [] }[],
+      doneLoad: false,
       data: {
-          series: [
-            {
-              data: []
-              // data: [
-              //   {
-              //     x: 'Test',
-              //     y: [
-              //       new Date('2019-03-04').getTime(),
-              //       new Date('2019-03-08').getTime()
-              //     ]
-              //   },
-              //   {
-              //     x: 'Validation',
-              //     y: [
-              //       new Date('2019-03-08').getTime(),
-              //       new Date('2019-03-12').getTime()
-              //     ]
-              //   },
-              //   {
-              //     x: 'Deployment',
-              //     y: [
-              //       new Date('2019-03-12').getTime(),
-              //       new Date('2020-04-18').getTime()
-              //     ]
-              //   }
-              // ]
-            }
-          ],
-          chartOptions: {
-            chart: {
-              height: 200,
-              width: 100,
-              type: 'rangeBar'
-            },
-            plotOptions: {
-              bar: {
-                horizontal: true
-              }
-            },
-            xaxis: {
-              type: 'datetime'
+        chartOptions: {
+          chart: {
+            height: 200,
+            width: 100,
+            type: 'rangeBar'
+          },
+          plotOptions: {
+            bar: {
+              horizontal: true
             }
           },
-          
-          
+          xaxis: {
+            type: 'datetime'
+          }
         },
-        
-      }
+      },
+    }
   },
   async mounted(){
+    this.ganchart = [];
+    this.doneLoad = false;
     const r = await this.api.getResource('/api/milestone', { limit: 30, page: 1} );
     this.pilihMilestone = r.data;
     const g = await this.api.getResource('/api/gantchart');
-    // this.ganchart = g[0].task.map((v: any) => {
-    //   return {
-    //     x: v.nama_tugas,
-    //     y: [
-    //       new Date(v.tgl_mulai_tugas).getTime(),
-    //       new Date(v.tgl_mulai_tugas).getTime(),
-    //     ]
-    //   };
-    // })
+    this.ganchart = [{
+      data: g[0].task.map((v: any) => {
+        return { x: v.nama_tugas, y: [
+          new Date(v.tgl_mulai_tugas).getTime(), new Date(v.tgl_selesai_tugas).getTime(),
+        ] }
+      })
+    }];
+    this.doneLoad = true;
   },
   components: {
       Parent, Child

@@ -167,9 +167,10 @@ onMounted(() => loadProyek());
                   <td>
                     <div class="row">
                       <div class="col">
-                        <p title="nomor">{{ proyek.nomor_proyek }} <span class="badge badge-info">{{ proyek.dinas }}</span></p>
-                        <div class="d-flex justify-content-between">
-                          <h4 class="mb-1">{{ proyek.nama_proyek }} </h4>
+                        <span class="badge badge-info">{{ proyek.dinas }}</span>
+                        <p title="nomor" class="mb-0">{{ proyek.nomor_proyek }}</p>
+                        <div class="">
+                          <h4 class="mb-1">{{ proyek.nama_proyek }}</h4>
                           <span>
                             <span class="badge badge-success fs-5 font-weight-bolder" title="tanggal mulai">{{ proyek.tgl_mulai_proyek.split('-').reverse().join('/') }}</span> - <span title="tanggal_selesai" class="badge badge-danger font-weight-bolder">{{ proyek.tgl_selesai_proyek.split('-').reverse().join('/') }}</span>
                           </span>
