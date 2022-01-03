@@ -12,6 +12,7 @@ const index = ref(0);
 
 const milestoneList = ref<any[]>([]);
 
+const { loadData, result: pilihNotif } = usePagination('/api/notif', 30, query);
 // const { loadData: loadMilestone, result: pilihMilestone } = usePagination('/api/tugasGrafik', 30, query);
 const { loadData: loadProyek, result: pilihProyek } = usePagination('/api/proyek', 30, query);
 
@@ -19,15 +20,14 @@ async function loadMilestone() {
   milestoneList.value = [];
   if(query.value){
     const d = await api.getResource('/api/tugasGrafik', { limit: 30, page: 1, query: query.value });
-    milestoneList.value = d.index;
+    milestoneList.value = d;
   }
   // console.log(milestoneList.value);
 };
 onMounted(async () => {
-  // const data = await api.getResource('/api/proyek', { limit: 30, page: 1 });
-  // proyekList.value = data.data;
   loadMilestone();
   loadProyek();
+  loadData();
 });
 
 </script>
@@ -51,6 +51,16 @@ onMounted(async () => {
                 </ol>
               </nav>
             </div>
+            <div class="col-lg-5 dropdown text-right">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="ni ni-bell-55"></i>
+              </button>
+              <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                <button class="dropdown-item" type="button">Action</button>
+                <button class="dropdown-item" type="button">Another action</button>
+                <button class="dropdown-item" type="button">Something else here</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -72,13 +82,9 @@ onMounted(async () => {
             <h3 class="mb-0 align-items-center">Data Milestone</h3>
           </div>
           <div v-for="milestone in milestoneList">
-            <div class="d-flex justify-content-center">
+            <div class="">
               <div class="p-2">{{ milestone.nama_milestone }}</div>
             </div>
-            <!-- <div class="d-flex justify-content-center">
-              <div class="p-2">milestone 1</div>
-              <div class="p-2">milestone 2</div>
-            </div> -->
           </div>
         </div>
       </div>

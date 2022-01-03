@@ -178,7 +178,7 @@ export default {
         return{
           api: new Api,
           karyawanList: [],
-          karyawan: { id_karyawan: 0, nama_karyawan: '', email: '', telp: '', id_jabatan: ''},
+          // karyawan: { id_karyawan: 0, nama_karyawan: '', email: '', telp: '', id_jabatan: ''},
           isEditing: false,
           pilihJabatan: {},
           jabatan: ''

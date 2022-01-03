@@ -37,13 +37,12 @@
                 <h6 class="col h2 text-black d-inline-block mb-0">Tugas</h6>
               </div>
             </div>
-
             <div class="container">
               <div class="row align-items-center py-3">
                 <div class="col-lg-3">
-                  <select class="form-control" id="id_milestone">
-                    <option disabled value="" selected="selected">Pilih Milestone</option>
-                    <option v-for="milestone in pilihMilestone" :key="milestone.id_milestone" :value="milestone.id_milestone"> {{ milestone.nama_milestone }} </option>
+                  <select class="form-control" id="id_milestone" v-model="query" change="loadMilestone">
+                    <option disabled value="">Pilih Milestone</option>
+                    <option v-for="(milestone, i) in pilihMilestone" :key="i" :value="milestone.id_milestone"> {{ milestone.nama_milestone }} </option>
                   </select>
                 </div>
               </div>
@@ -67,8 +66,8 @@
               </div>
             </nav>
             <!-- End Navbar -->
-            <div class="mx-auto">
-              <apexchart width="500" type="bar" :options="options" :series="series" />
+            <div id="chart">
+              <apexchart v-if="ganchart.length > 0" type="rangeBar" height="350" :options="data.chartOptions" :series="ganchart"></apexchart>
             </div>
           </div>
       </div>
@@ -80,39 +79,88 @@
 
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue';
 import Parent from '../views/Parent.vue';
 import Child from '../views/Child.vue'
 import Api from '../services/api';
 
-export default {
+export default defineComponent({
   data(){
     return{
       api: new Api,
       isTable: false,
+      query: '',
+      pilihMilestone: [] as { id_milestone: number, nama_milestone: string }[],
       milestone: '',
-      pilihMilestone: {},
-      pilihJabatan: {},
-      jabatan: '',
-      options: {
-        chart: {
-          id: 'vuechart-example'
+      ganchart: [],
+      gant: '',
+      data: {
+          series: [
+            {
+              data: []
+              // data: [
+              //   {
+              //     x: 'Test',
+              //     y: [
+              //       new Date('2019-03-04').getTime(),
+              //       new Date('2019-03-08').getTime()
+              //     ]
+              //   },
+              //   {
+              //     x: 'Validation',
+              //     y: [
+              //       new Date('2019-03-08').getTime(),
+              //       new Date('2019-03-12').getTime()
+              //     ]
+              //   },
+              //   {
+              //     x: 'Deployment',
+              //     y: [
+              //       new Date('2019-03-12').getTime(),
+              //       new Date('2020-04-18').getTime()
+              //     ]
+              //   }
+              // ]
+            }
+          ],
+          chartOptions: {
+            chart: {
+              height: 200,
+              width: 100,
+              type: 'rangeBar'
+            },
+            plotOptions: {
+              bar: {
+                horizontal: true
+              }
+            },
+            xaxis: {
+              type: 'datetime'
+            }
+          },
+          
+          
         },
-        xaxis: {
-          categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998]
-        },
-      },
-      series: [{
-      name: 'series-1',
-      data: [30, 40, 45, 50, 49, 60, 70, 91]
-      }]
-    }
+        
+      }
   },
   async mounted(){
-    this.pilihMilestone = await this.api.getResource('/api/milestone');
+    const r = await this.api.getResource('/api/milestone', { limit: 30, page: 1} );
+    this.pilihMilestone = r.data;
+    const g = await this.api.getResource('/api/gantchart');
+    // this.ganchart = g[0].task.map((v: any) => {
+    //   return {
+    //     x: v.nama_tugas,
+    //     y: [
+    //       new Date(v.tgl_mulai_tugas).getTime(),
+    //       new Date(v.tgl_mulai_tugas).getTime(),
+    //     ]
+    //   };
+    // })
   },
   components: {
       Parent, Child
   }
-}
+})
 </script>
