@@ -67,7 +67,7 @@
             </nav>
             <!-- End Navbar -->
             <div id="chart">
-              <apexchart v-if="doneLoad" type="rangeBar" height="350" :options="data.chartOptions" :series="ganchart"></apexchart>
+              <apexchart type="rangeBar" height="350" :options="data.chartOptions" :series="ganchart"></apexchart>
             </div>
           </div>
       </div>

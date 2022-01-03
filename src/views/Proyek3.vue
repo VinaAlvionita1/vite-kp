@@ -177,7 +177,7 @@ onMounted(() => loadProyek());
                         </div>
                         <div class="mt-2 d-flex justify-content-between">
                           <span title="tahun anggaran"><i class="fa fa-fw fa-calendar"></i> {{ proyek.thn_anggaran }}</span>
-                          <span title="harga"><i class="fa fa-fw fa-cart-plus"></i> {{ proyek.harga }}</span>
+                          <span title="harga"><i class="fa fa-fw fa-cart-plus"></i> {{ parseFloat(proyek.harga).toLocaleString('id') }}</span>
                           <span title="lokasi"><i class="fa fa-fw fa-map-marker"></i> {{ proyek.lokasi }}</span>
                         </div>
                       </div>
