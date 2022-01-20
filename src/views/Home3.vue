@@ -6,14 +6,13 @@ import { onMounted, ref, watch } from 'vue';
 import usePagination from '../composables/pagination';
 
 const api: Api = new Api();
-const proyekList = ref<any[]>([]);
+const pesan = ref('');
 const query = ref('');
 const index = ref(0);
 
 const milestoneList = ref<any[]>([]);
 
-const { loadData, result: pilihNotif } = usePagination('/api/notif', 30, query);
-// const { loadData: loadMilestone, result: pilihMilestone } = usePagination('/api/tugasGrafik', 30, query);
+const { loadData: loadNotif, result: notifList } = usePagination('/api/notif', 100, query);
 const { loadData: loadProyek, result: pilihProyek } = usePagination('/api/proyek', 30, query);
 
 async function loadMilestone() {
@@ -27,7 +26,7 @@ async function loadMilestone() {
 onMounted(async () => {
   loadMilestone();
   loadProyek();
-  loadData();
+  loadNotif();
 });
 
 </script>
@@ -51,14 +50,13 @@ onMounted(async () => {
                 </ol>
               </nav>
             </div>
-            <div class="col-lg-5 dropdown text-right">
+            <div class="col-lg-4 dropdown text-right">
               <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="ni ni-bell-55"></i>
               </button>
               <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                <button class="dropdown-item" type="button">Action</button>
-                <button class="dropdown-item" type="button">Another action</button>
-                <button class="dropdown-item" type="button">Something else here</button>
+                <b>Saya Vio</b><br>
+                <b class="dropdown-item" type="button" v-for="notif in notifList"> {{ notif.pesan }} </b><br>
               </div>
             </div>
           </div>
@@ -83,7 +81,13 @@ onMounted(async () => {
           </div>
           <div v-for="milestone in milestoneList">
             <div class="">
-              <div class="p-2">{{ milestone.nama_milestone }}</div>
+              <div class="bg-danger text-white" v-if="milestone.status == 1">{{ milestone.nama_milestone }}</div>
+            </div>
+            <div class="">
+              <div class="bg-warning text-white" v-if="milestone.status == 2">{{ milestone.nama_milestone }}</div>
+            </div>
+            <div class="">
+              <div class="bg-success text-white" v-if="milestone.status == 3">{{ milestone.nama_milestone }}</div>
             </div>
           </div>
         </div>
@@ -95,3 +99,18 @@ onMounted(async () => {
   </div>
   <!-- End Main Content -->
 </template>
+
+<style scoped>
+.p2{
+  text-decoration-color: white;
+  background-color: red;
+}
+.p3{
+  text-decoration-color: white;
+  background-color: green;
+}
+.p4{
+  text-decoration-color: white;
+  background-color: yellow;
+}
+</style>

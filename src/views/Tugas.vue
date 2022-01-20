@@ -40,7 +40,7 @@
             <div class="container">
               <div class="row align-items-center py-3">
                 <div class="col-lg-3">
-                  <select class="form-control" id="id_milestone" v-model="query" change="loadMilestone">
+                  <select class="form-control" id="id_milestone" v-model="query" @change="loadGant()">
                     <option disabled value="">Pilih Milestone</option>
                     <option v-for="(milestone, i) in pilihMilestone" :key="i" :value="milestone.id_milestone"> {{ milestone.nama_milestone }} </option>
                   </select>
@@ -66,6 +66,9 @@
               </div>
             </nav>
             <!-- End Navbar -->
+            <div v-for="a in nama">
+              <h2> GanChart dari Milestone : {{ a.nama_milestone }}</h2>
+            </div>
             <div id="chart">
               <apexchart type="rangeBar" height="350" :options="data.chartOptions" :series="ganchart"></apexchart>
             </div>
@@ -90,16 +93,17 @@ export default defineComponent({
     return{
       api: new Api,
       isTable: false,
+      cari: '',
       query: '',
       pilihMilestone: [] as { id_milestone: number, nama_milestone: string }[],
       milestone: '',
       ganchart: [] as { data: [] }[],
       doneLoad: false,
+      nama: [] as { id_milestone: number, nama_milestone: '' }[],
       data: {
         chartOptions: {
           chart: {
-            height: 200,
-            width: 100,
+            height: 350,
             type: 'rangeBar'
           },
           plotOptions: {
@@ -114,12 +118,33 @@ export default defineComponent({
       },
     }
   },
+
+  methods: {
+    async loadGant(){
+    this.ganchart = [];
+    this.doneLoad = false;
+    const r = await this.api.getResource('/api/milestone', { limit: 30, page: 1 });
+    this.pilihMilestone = r.data;
+    const g = await this.api.getResource('/api/gantchart', { query: this.query });
+    this.nama = g
+    this.ganchart = [{
+      data: g[0].task.map((v: any) => {
+        return { x: v.nama_tugas, y: [
+          new Date(v.tgl_mulai_tugas).getTime(), new Date(v.tgl_selesai_tugas).getTime(),
+        ] }
+      })
+    }];
+    this.doneLoad = true;
+    }
+  },
+
   async mounted(){
     this.ganchart = [];
     this.doneLoad = false;
-    const r = await this.api.getResource('/api/milestone', { limit: 30, page: 1} );
+    const r = await this.api.getResource('/api/milestone', { limit: 30, page: 1 });
     this.pilihMilestone = r.data;
-    const g = await this.api.getResource('/api/gantchart');
+    const g = await this.api.getResource('/api/gantchart', { query: this.query });
+    this.nama = g;
     this.ganchart = [{
       data: g[0].task.map((v: any) => {
         return { x: v.nama_tugas, y: [

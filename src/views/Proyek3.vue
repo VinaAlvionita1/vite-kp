@@ -292,7 +292,7 @@ onMounted(() => loadProyek());
                   
                   </div>
                   <div class="col-lg-11 text-right">
-                    <a href="" class="btn btn-success" :class="{ disabled: ! metaForm.valid }" :disabled=" ! metaForm.valid" @click="simpanProyek()">SIMPAN DATA</a>
+                    <a href="" class="btn btn-success" @click="simpanProyek()">SIMPAN DATA</a>
                     <a href="" class="btn btn-primary" @click.prevent="kembali()">KEMBALI</a>
                   </div>
                 </div>
