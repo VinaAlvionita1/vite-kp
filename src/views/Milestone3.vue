@@ -20,24 +20,30 @@ import Child from './Child.vue';
     const isEditing = ref(false);
     const idMilestone = ref(0);
 
+    async function loadProyek(){
+      pilihProyek.value = [];
+      const d = await api.getResource('/api/proyek');
+      pilihProyek.value = d.data;
+    }
+
     const { setValues, meta: metaForm, resetForm } = useForm({
         validationSchema: yup.object({
-            nama_milesone: yup.string().required().min(3).max(60),
+            nama_milestone: yup.string().required().min(3).max(1000),
             id_proyek: yup.string().required().min(1).max(3),
         })
     });
 
-    const { value: nama_milestone } = useField('nama_milestone');
-    const { value: id_proyek } = useField('id_proyek');
+    const { value: nama_milestone } = useField<string>('nama_milestone');
+    const { value: id_proyek } = useField<string>('id_proyek');
 
     function editMilestone(i?: number) {
     idMilestone.value = 0;
     isEditing.value = true;
     // kalau sedang mengedit
         if (i !== undefined) {
-            const item = milestoneList.value[i];
-            idMilestone.value = item.id_Milestone;
-            setValues({ ...item });
+          const item = milestoneList.value[i];
+          idMilestone.value = item.id_milestone;
+          setValues({ nama_milestone : item.nama_milestone, id_proyek : item.id_proyek });
         }
     }
     function kembali() {
@@ -72,13 +78,20 @@ import Child from './Child.vue';
         }
     }
     }
+    const notifList = ref<any[]>([]);
+    async function loadNotif(){
+      notifList.value = [];
+      const d = await api.getResource('/api/notif');
+      notifList.value = d;
+    }
 
     /**
      * MOUNTED, LOAD DATA MILESTONE
      */
     onMounted(async() => {
       loadMilestone(),
-      pilihProyek.value = await api.getResource('/api/proyek');
+      loadProyek(),
+      loadNotif()
     });
 
 </script>
@@ -104,6 +117,14 @@ import Child from './Child.vue';
                   <li class="breadcrumb-item active" aria-current="page">Milestone</li>
                 </ol>
               </nav>
+            </div>
+            <div class="col-lg-5 dropdown text-right">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="ni ni-bell-55"></i>
+              </button>
+              <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                <b class="dropdown-item" type="button" v-for="notif in notifList"> {{ notif.pesan }} </b><br>
+              </div>
             </div>
           </div>
         </div>
@@ -216,7 +237,7 @@ import Child from './Child.vue';
                     <div class="col-lg-8">
                        <div class="form-group">
                         <label class="form-control-label" for="input-first-name">Proyek</label>
-                        <select class="form-control" id="id_proyek">
+                        <select class="form-control" id="id_proyek" v-model="id_proyek">
                           <option value="">Pilih Proyek</option>
                           <option v-for="proyek in pilihProyek" :key="proyek.id_proyek" :value="proyek.id_proyek"> {{ proyek.nama_proyek }}</option>
                         </select>
@@ -231,7 +252,7 @@ import Child from './Child.vue';
                     
                     </div>
                     <div class="col-lg-11 text-right">
-                      <a class="btn btn-success" @click="simpanMilestone()">SIMPAN</a>
+                      <a class="btn btn-success" :class="{ disabled: ! metaForm.valid }" :disabled=" ! metaForm.valid" @click="simpanMilestone()">SIMPAN</a>
                       <a class="btn btn-primary" @click="kembali()">KEMBALI</a>
                     </div>
                   </div>

@@ -45,6 +45,7 @@ import Pagination from '../components/pagination.vue';
     function editBerkas(i?: number) {
       idBerkas.value = 0;
       isEditing.value = true;
+      file.value = '';
       setValues({ nama_berkas: '', keterangan: '', tgl_upload: '', id_milestone: '' });
       // kalau sedang mengedit
       if (i !== undefined) {
@@ -59,7 +60,8 @@ import Pagination from '../components/pagination.vue';
 
     function kembali() {
       isEditing.value = false;
-        resetForm();
+      file.value = '';
+      resetForm();
     }
 
     async function simpanBerkas() {
@@ -101,12 +103,20 @@ import Pagination from '../components/pagination.vue';
       }
     }
 
+    const notifList = ref<any[]>([]);
+    async function loadNotif(){
+      notifList.value = [];
+      const d = await api.getResource('/api/notif');
+      notifList.value = d;
+    }
+
     /**
      * MOUNTED, LOAD DATA TUGAS
      */
     onMounted(async () => {
       loadMilestone();
       loadBerkas();
+      loadNotif();
     });
 
 </script>
@@ -131,6 +141,14 @@ import Pagination from '../components/pagination.vue';
                   <li class="breadcrumb-item active" aria-current="page">Berkas</li>
                 </ol>
               </nav>
+            </div>
+            <div class="col-lg-5 dropdown text-right">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="ni ni-bell-55"></i>
+              </button>
+              <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                <b class="dropdown-item" type="button" v-for="notif in notifList"> {{ notif.pesan }} </b><br>
+              </div>
             </div>
           </div>
         </div>

@@ -19,6 +19,14 @@
                 </ol>
               </nav>
             </div>
+            <div class="col-lg-5 dropdown text-right">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="ni ni-bell-55"></i>
+              </button>
+              <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                <b class="dropdown-item" type="button" v-for="notif in notifList"> {{ notif.pesan }} </b><br>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -95,6 +103,7 @@ export default defineComponent({
       isTable: false,
       cari: '',
       query: '',
+      notifList: [] as { pesan: string }[],
       pilihMilestone: [] as { id_milestone: number, nama_milestone: string }[],
       milestone: '',
       ganchart: [] as { data: [] }[],
@@ -139,6 +148,10 @@ export default defineComponent({
   },
 
   async mounted(){
+    this.notifList = [];
+    const d = await this.api.getResource('/api/notif');
+    this.notifList = d;
+
     this.ganchart = [];
     this.doneLoad = false;
     const r = await this.api.getResource('/api/milestone', { limit: 30, page: 1 });

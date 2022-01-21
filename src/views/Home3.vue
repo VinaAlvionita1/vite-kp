@@ -11,9 +11,16 @@ const query = ref('');
 const index = ref(0);
 
 const milestoneList = ref<any[]>([]);
+const notifList = ref<any[]>([]);
 
-const { loadData: loadNotif, result: notifList } = usePagination('/api/notif', 100, query);
+// const { loadData: loadNotif, result: notifList } = usePagination('/api/notif', 100, query);
 const { loadData: loadProyek, result: pilihProyek } = usePagination('/api/proyek', 30, query);
+
+async function loadNotif(){
+  notifList.value = [];
+  const d = await api.getResource('/api/notif');
+  notifList.value = d;
+}
 
 async function loadMilestone() {
   milestoneList.value = [];
@@ -50,12 +57,11 @@ onMounted(async () => {
                 </ol>
               </nav>
             </div>
-            <div class="col-lg-4 dropdown text-right">
+            <div class="col-lg-5 dropdown text-right">
               <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="ni ni-bell-55"></i>
               </button>
               <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                <b>Saya Vio</b><br>
                 <b class="dropdown-item" type="button" v-for="notif in notifList"> {{ notif.pesan }} </b><br>
               </div>
             </div>

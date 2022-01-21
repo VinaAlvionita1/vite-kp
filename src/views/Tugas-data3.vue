@@ -93,6 +93,13 @@ import Pagination from '../components/pagination.vue';
     }
   }
 
+  const notifList = ref<any[]>([]);
+  async function loadNotif(){
+    notifList.value = [];
+    const d = await api.getResource('/api/notif');
+    notifList.value = d;
+  }
+
 /**
  * MOUNTED, LOAD DATA TUGAS
  */
@@ -102,6 +109,7 @@ onMounted(async () => {
   pilihStatus.value = await api.getResource('/api/status');
   loadKaryawan();
   loadTugas();
+  loadNotif()
 });
 
 </script>
@@ -126,6 +134,14 @@ onMounted(async () => {
                   <li class="breadcrumb-item active" aria-current="page">Tugas</li>
                 </ol>
               </nav>
+            </div>
+            <div class="col-lg-5 dropdown text-right">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="ni ni-bell-55"></i>
+              </button>
+              <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                <b class="dropdown-item" type="button" v-for="notif in notifList"> {{ notif.pesan }} </b><br>
+              </div>
             </div>
           </div>
         </div>

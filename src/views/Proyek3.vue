@@ -25,14 +25,14 @@ const idProyek = ref(0);
 
 const { setValues, meta: metaForm, resetForm } = useForm({
   validationSchema: yup.object({
-    nomor_proyek: yup.string().required().min(3).max(100),
-    nama_proyek: yup.string().required().min(3).max(100),
-    lokasi: yup.string().required().min(3).max(100),
-    dinas: yup.string().required().min(3).max(100),
-    thn_anggaran: yup.number().required().min(2).max(4000),
-    harga: yup.number().required().min(3).max(60),
-    tgl_mulai_proyek: yup.string().required().min(3).max(10),
-    tgl_selesai_proyek: yup.string().required().min(3).max(10),
+    nomor_proyek: yup.string().required().min(3).max(1000),
+    nama_proyek: yup.string().required().min(3).max(1000),
+    lokasi: yup.string().required().min(3).max(1000),
+    dinas: yup.string().required().min(3).max(1000),
+    thn_anggaran: yup.number().required(),
+    harga: yup.number().required(),
+    tgl_mulai_proyek: yup.string().required().min(10).max(10),
+    tgl_selesai_proyek: yup.string().required().min(10).max(10),
   })
 });
 
@@ -55,6 +55,7 @@ function editProyek(i?: number) {
     setValues({ ...item });
   }
 }
+
 function kembali() {
   isEditing.value = false;
   resetForm();
@@ -90,10 +91,22 @@ async function hapusProyek(i: number) {
   }
 }
 
+
+const notifList = ref<any[]>([]);
+async function loadNotif(){
+  notifList.value = [];
+  const d = await api.getResource('/api/notif');
+  notifList.value = d;
+}
+
 /**
  * MOUNTED, LOAD DATA PROYEK
  */
-onMounted(() => loadProyek());
+onMounted(async () => {
+  loadProyek(),
+  loadNotif()
+});
+  
 
 </script>
 
@@ -115,6 +128,14 @@ onMounted(() => loadProyek());
                   <li class="breadcrumb-item active" aria-current="page">Proyek</li>
                 </ol>
               </nav>
+            </div>
+            <div class="col-lg-5 dropdown text-right">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="ni ni-bell-55"></i>
+              </button>
+              <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                <b class="dropdown-item" type="button" v-for="notif in notifList"> {{ notif.pesan }} </b><br>
+              </div>
             </div>
           </div>
         </div>
@@ -264,7 +285,7 @@ onMounted(() => loadProyek());
                   <div class="col-lg-3">
                     <div class="form-group">
                       <label class="form-control-label" for="harga">Harga</label>
-                      <input type="text" id="harga" v-model="harga" class="form-control" placeholder="Masukkan Harga Proyek">
+                      <input type="number" id="harga" v-model="harga" class="form-control" placeholder="Masukkan Harga Proyek">
                     </div>
                   </div>
                 </div>
@@ -292,7 +313,7 @@ onMounted(() => loadProyek());
                   
                   </div>
                   <div class="col-lg-11 text-right">
-                    <a href="" class="btn btn-success" @click="simpanProyek()">SIMPAN DATA</a>
+                    <a href="" class="btn btn-success" :class="{ disabled: ! metaForm.valid }" :disabled=" ! metaForm.valid" @click.prevent="simpanProyek()">SIMPAN DATA</a>
                     <a href="" class="btn btn-primary" @click.prevent="kembali()">KEMBALI</a>
                   </div>
                 </div>
