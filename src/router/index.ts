@@ -7,6 +7,8 @@ import Tugas from "../views/Tugas.vue"
 import DataTugas from "../views/Tugas-data3.vue"
 import Berkas from "../views/Berkas3.vue"
 import Milestone from "../views/Milestone3.vue"
+import Rekap from "../views/Rekap3.vue"
+import DetailNotif from "../views/Detail-notif.vue"
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -48,6 +50,16 @@ const routes: Array<RouteRecordRaw> = [
         path: '/milestone',
         name: 'Milestone',
         component: Milestone
+    },
+    {
+        path: '/rekap-proyek',
+        name: 'Rekap',
+        component: Rekap
+    },
+    {
+        path: '/detail-notif',
+        name: 'DetailNotif',
+        component: DetailNotif
     }
 ];
 

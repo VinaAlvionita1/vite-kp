@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, reactive } from 'vue';
+import { onMounted, ref, reactive, computed } from 'vue';
 import usePagination from '../composables/pagination';
 import Parent from './Parent.vue';
 import Child from './Child.vue';
@@ -8,14 +8,17 @@ import * as yup from 'yup';
 import Api from '../services/api';
 import Pagination from '../components/pagination.vue';
 import { showConfirmDialog } from '../services/helpers';
+import swal from 'sweetalert';
 
 const query = ref('');
 const api: Api = new Api();
+const angka = ref<number[]>([5, 10, 15, 20]);
+const limit = ref(2);
 const { 
   loadData: loadProyek, result: proyekList, pages: pageList,
   page: currentPage, isFirstPage, isLastPage, gotoPage,
-  nextPage, prevPage
-} = usePagination('/api/proyek', 2, query);
+  nextPage, prevPage, changeLimit
+} = usePagination('/api/proyek', limit.value, query);
 
 /**
  * EDITING
@@ -45,6 +48,11 @@ const { value: harga } = useField('harga');
 const { value: tgl_mulai_proyek } = useField('tgl_mulai_proyek');
 const { value: tgl_selesai_proyek } = useField('tgl_selesai_proyek');
 
+async function showEntri(){
+  changeLimit(limit.value);
+  loadProyek();
+}
+
 function editProyek(i?: number) {
   idProyek.value = 0;
   isEditing.value = true;
@@ -61,6 +69,8 @@ function kembali() {
   resetForm();
 }
 
+const error = ref<any[]>([]);
+const err = ref<any>('');
 async function simpanProyek() {
   let url = '/api/proyek';
   if (idProyek.value > 0) {
@@ -76,7 +86,9 @@ async function simpanProyek() {
     resetForm();
     loadProyek();
   } catch (err) {
-    console.log(err);
+    console.log('Tanggal Salah Woy');
+    swal("Maaf", "Tanggal Mulai Harus Lebih Awal Dari Tanggal Akhir!", "error");
+    isEditing.value = true;
   }
 }
 async function hapusProyek(i: number) {
@@ -86,7 +98,8 @@ async function hapusProyek(i: number) {
       await api.deleteResource(`/api/proyek/${proyekList.value[i].id_proyek}`);
       loadProyek();
     } catch (err) {
-      console.log(err);
+      console.log('Ada Tugasnya Woy!!');
+      swal("Maaf!", "Proyek Tidak Dapat Dihapus, Dikarenakan Terdapat Tugas Didalamnya!", "error");
     }
   }
 }
@@ -104,10 +117,9 @@ async function loadNotif(){
  */
 onMounted(async () => {
   loadProyek(),
-  loadNotif()
+  loadNotif();
 });
   
-
 </script>
 
 <template>
@@ -158,14 +170,27 @@ onMounted(async () => {
           </div>
 
           <div class="container">
-            <div class="row align-items-center py-3">
-              <div class="col-lg-6">
+            <div class="row align-items-center py-3 ml-2">
+              <small>Show</small>
+                <div class="col-lg-1">
+                  <select class="form-control responsive" id="id_proyek" v-model="limit" @change="showEntri()">
+                    <option selected>2</option>
+                    <option v-for="proyek in angka"> {{ proyek }} </option>
+                  </select>
+                </div>
+              <small>Entries</small>
+              <div class="col-lg-3">
                 <form class="form-inline ml-3">
                   <input class="form-control mr-sm-1" @keyup="loadProyek" v-model="query" type="search" placeholder="Cari..." aria-label="Search">
                 </form>
               </div>
-              <div class="col-lg-6 text-right">
-                <a href="#" class="btn btn-primary mr-3" type="button" @click.prevent="editProyek()"> + Proyek </a>
+              <div class="col-lg-7 text-right">
+                <a href="#" class="btn btn-primary" type="button" @click="editProyek()"> + Proyek </a>
+                <span>
+                  <router-link to="/rekap-proyek" class="btn btn-success" type="button">
+                    <i class="ni ni-books"></i>
+                  </router-link>
+                </span>
               </div>
             </div>
           </div>

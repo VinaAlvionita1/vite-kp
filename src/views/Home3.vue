@@ -4,14 +4,16 @@ import Child from './Child.vue';
 import Api from '../services/api';
 import { onMounted, ref, watch } from 'vue';
 import usePagination from '../composables/pagination';
+import router from '../router';
 
 const api: Api = new Api();
-const pesan = ref('');
+const notif = ref('');
 const query = ref('');
 const index = ref(0);
 
 const milestoneList = ref<any[]>([]);
 const notifList = ref<any[]>([]);
+const tugasList = ref<any[]>([]);
 
 // const { loadData: loadNotif, result: notifList } = usePagination('/api/notif', 100, query);
 const { loadData: loadProyek, result: pilihProyek } = usePagination('/api/proyek', 30, query);
@@ -20,6 +22,14 @@ async function loadNotif(){
   notifList.value = [];
   const d = await api.getResource('/api/notif');
   notifList.value = d;
+}
+
+async function detailTugas(i?: number){
+  if (i !== undefined) {
+    const item = notifList.value[i];
+    router.replace('/detail-notif');
+    const a = await api.getResource('/api/tugas', { limit: 30, page: 1, query: item.nama_tugas});
+  }
 }
 
 async function loadMilestone() {
@@ -62,7 +72,12 @@ onMounted(async () => {
                 <i class="ni ni-bell-55"></i>
               </button>
               <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                <b class="dropdown-item" type="button" v-for="notif in notifList"> {{ notif.pesan }} </b><br>
+                <b class="dropdown-item" type="button" v-for="(notif, i) in notifList" :key="i"> 
+                <span>
+                  <button class="btn btn-primary" type="button" @click="detailTugas(i)"> Detail </button>
+                </span>
+                {{ notif.pesan }} 
+                </b><br>
               </div>
             </div>
           </div>
@@ -74,26 +89,12 @@ onMounted(async () => {
     <div class="container-fluid mt--6">
       <div class="col">
         <div class="card">
-          <form class="col-lg-12">
-            <div class="col-lg-3">
-              <select class="form-control" id="id_milestone" v-model="query" @change="loadMilestone">
-                <option value="">Pilih Proyek</option>
-                <option v-for="proyek in pilihProyek" :key="proyek.id_proyek" :value="proyek.id_proyek"> {{ proyek.nama_proyek }} </option>
-              </select>
-            </div>
-          </form>
-          <div class="card-header border-0">
-            <h3 class="mb-0 align-items-center">Data Milestone</h3>
-          </div>
-          <div v-for="milestone in milestoneList">
-            <div class="">
-              <div class="bg-danger text-white" v-if="milestone.status == 1">{{ milestone.nama_milestone }}</div>
-            </div>
-            <div class="">
-              <div class="bg-warning text-white" v-if="milestone.status == 2">{{ milestone.nama_milestone }}</div>
-            </div>
-            <div class="">
-              <div class="bg-success text-white" v-if="milestone.status == 3">{{ milestone.nama_milestone }}</div>
+          <div class="row align-items-center py-1">
+            <div class="col text-center">
+              <a class="navbar-brand mt-6" href="javascript:void(0)">
+                <img src="logo.png" class="navbar-brand-img" width="200" height="100" >
+              </a>
+              <h2 class="mt-4 mb-6">Aplikasi Sistem Penjadwalan Proyek</h2>
             </div>
           </div>
         </div>

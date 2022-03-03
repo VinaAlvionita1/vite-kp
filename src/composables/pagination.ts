@@ -14,6 +14,10 @@ export default function usePagination(path: string, limit: number, query?: any) 
   const pages = ref<number[]>([]);
   const number = ref(0);
 
+  function changeLimit(l: number) {
+    limit = l;
+  }
+
   function generate(totalItems: number, currentPage?: number) {
     page.value = currentPage || 1;
     count.value = totalItems;
@@ -89,7 +93,7 @@ export default function usePagination(path: string, limit: number, query?: any) 
 
   return {
     page, start, end, count, pages, isFirstPage, isLastPage, result, number, loadKaryawan,
-    loadData, prevPage, gotoPage, nextPage, firstPage, lastPage
+    loadData, prevPage, gotoPage, nextPage, firstPage, lastPage, changeLimit
   }
 
 }

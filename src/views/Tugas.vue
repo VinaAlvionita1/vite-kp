@@ -48,9 +48,15 @@
             <div class="container">
               <div class="row align-items-center py-3">
                 <div class="col-lg-3">
+                  <select class="form-control" id="id_proyek" v-model="cari" @change="loadGant()">
+                    <option disabled value="">Pilih Proyek</option>
+                    <option v-for="proyek in pilihProyek" :value="proyek.id_proyek"> {{ proyek.nama_proyek }} </option>
+                  </select>
+                </div>
+                <div class="col-lg-3">
                   <select class="form-control" id="id_milestone" v-model="query" @change="loadGant()">
                     <option disabled value="">Pilih Milestone</option>
-                    <option v-for="(milestone, i) in pilihMilestone" :key="i" :value="milestone.id_milestone"> {{ milestone.nama_milestone }} </option>
+                    <option v-for="milestone in pilihMilestone" :value="milestone.id_milestone"> {{ milestone.nama_milestone }} </option>
                   </select>
                 </div>
               </div>
@@ -75,7 +81,9 @@
             </nav>
             <!-- End Navbar -->
             <div v-for="a in nama">
-              <h2> GanChart dari Milestone : {{ a.nama_milestone }}</h2>
+              <center>
+                <h3 class="mt-4"> GanChart Tugas dari Milestone : {{ a.nama_milestone }}</h3>
+              </center>
             </div>
             <div id="chart">
               <apexchart type="rangeBar" height="350" :options="data.chartOptions" :series="ganchart"></apexchart>
@@ -104,7 +112,8 @@ export default defineComponent({
       cari: '',
       query: '',
       notifList: [] as { pesan: string }[],
-      pilihMilestone: [] as { id_milestone: number, nama_milestone: string }[],
+      pilihProyek: [] as { id_proyek: number, nama_proyek: string, nama_milestone: string }[],
+      pilihMilestone: [] as { id_milestone: number, nama_milestone: string, id_proyek: number }[],
       milestone: '',
       ganchart: [] as { data: [] }[],
       doneLoad: false,
@@ -129,13 +138,22 @@ export default defineComponent({
   },
 
   methods: {
+    async loadProyek(){
+      const p = await this.api.getResource('/api/proyek');
+      this.pilihProyek = p.data;
+      const r = await this.api.getResource('/api/pilihProyek', { limit: 30, page: 1, cari: this.cari });
+      this.pilihMilestone = r[0].mlst;
+    },
+
     async loadGant(){
     this.ganchart = [];
     this.doneLoad = false;
-    const r = await this.api.getResource('/api/milestone', { limit: 30, page: 1 });
-    this.pilihMilestone = r.data;
+    const p = await this.api.getResource('/api/proyek');
+    this.pilihProyek = p.data;
+    const r = await this.api.getResource('/api/pilihProyek', { limit: 30, page: 1, cari: this.cari });
+    this.pilihMilestone = r[0].mlst;
     const g = await this.api.getResource('/api/gantchart', { query: this.query });
-    this.nama = g
+    this.nama = g;
     this.ganchart = [{
       data: g[0].task.map((v: any) => {
         return { x: v.nama_tugas, y: [
@@ -154,18 +172,10 @@ export default defineComponent({
 
     this.ganchart = [];
     this.doneLoad = false;
-    const r = await this.api.getResource('/api/milestone', { limit: 30, page: 1 });
-    this.pilihMilestone = r.data;
-    const g = await this.api.getResource('/api/gantchart', { query: this.query });
-    this.nama = g;
-    this.ganchart = [{
-      data: g[0].task.map((v: any) => {
-        return { x: v.nama_tugas, y: [
-          new Date(v.tgl_mulai_tugas).getTime(), new Date(v.tgl_selesai_tugas).getTime(),
-        ] }
-      })
-    }];
-    this.doneLoad = true;
+    const p = await this.api.getResource('/api/proyek');
+    this.pilihProyek = p.data;
+    const r = await this.api.getResource('/api/pilihProyek', { limit: 30, page: 1, cari: this.cari });
+    this.nama = r;
   },
   components: {
       Parent, Child

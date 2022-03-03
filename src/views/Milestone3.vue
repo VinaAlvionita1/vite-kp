@@ -8,91 +8,102 @@ import { showConfirmDialog } from '../services/helpers';
 import Pagination from '../components/pagination.vue';
 import Parent from './Parent.vue';
 import Child from './Child.vue';
-
+import swal from 'sweetalert';
 
     
-    const api: Api = new Api();
-    const query = ref('');
-    const pilihProyek = ref<any[]>([]);
-    const { loadData: loadMilestone, result: milestoneList, pages: pageList,
-    page: currentPage, isFirstPage, isLastPage, gotoPage,
-    nextPage, prevPage } = usePagination('/api/milestone', 2, query);
-    const isEditing = ref(false);
-    const idMilestone = ref(0);
+  const api: Api = new Api();
+  const query = ref('');
+  const lim = ref<number>();
+  const pilihProyek = ref<any[]>([]);
+  const isEditing = ref(false);
+  const idMilestone = ref(0);
+  const angka = ref<number[]>([5, 10, 15, 20]);
+  const limit = ref(2);
+  const { loadData: loadMilestone, result: milestoneList, pages: pageList,
+  page: currentPage, isFirstPage, isLastPage, gotoPage,
+  nextPage, prevPage, changeLimit } = usePagination('/api/milestone', limit.value, query);
 
-    async function loadProyek(){
-      pilihProyek.value = [];
-      const d = await api.getResource('/api/proyek');
-      pilihProyek.value = d.data;
-    }
+  async function loadProyek(){
+    pilihProyek.value = [];
+    const d = await api.getResource('/api/proyek');
+    pilihProyek.value = d.data;
+  }
 
-    const { setValues, meta: metaForm, resetForm } = useForm({
-        validationSchema: yup.object({
-            nama_milestone: yup.string().required().min(3).max(1000),
-            id_proyek: yup.string().required().min(1).max(3),
-        })
-    });
+  const { setValues, meta: metaForm, resetForm } = useForm({
+      validationSchema: yup.object({
+          nama_milestone: yup.string().required().min(3).max(1000),
+          id_proyek: yup.string().required().min(1).max(3),
+      })
+  });
 
-    const { value: nama_milestone } = useField<string>('nama_milestone');
-    const { value: id_proyek } = useField<string>('id_proyek');
+  const { value: nama_milestone } = useField<string>('nama_milestone');
+  const { value: id_proyek } = useField<string>('id_proyek');
 
-    function editMilestone(i?: number) {
-    idMilestone.value = 0;
+  function showEntri(){
+    changeLimit(limit.value);
+    loadMilestone();
+  }
+
+  function editMilestone(i?: number) {
+  idMilestone.value = 0;
+  isEditing.value = true;
+  // kalau sedang mengedit
+      if (i !== undefined) {
+        const item = milestoneList.value[i];
+        idMilestone.value = item.id_milestone;
+        setValues({ nama_milestone : item.nama_milestone, id_proyek : item.id_proyek });
+      }
+  }
+  function kembali() {
+      isEditing.value = false;
+      resetForm();
+  }
+
+  async function simpanMilestone() {
+  let url = '/api/milestone';
+  if (idMilestone.value > 0) {
+      url += `/${idMilestone.value}`;
+  }
+  try {
+      await api.postResource(url, { 
+      nama_milestone: nama_milestone.value, id_proyek: id_proyek.value
+      }, idMilestone.value > 0 ? 'PUT' : 'POST');
+      isEditing.value = false;
+      resetForm();
+      loadMilestone();
+  } catch (err) {
+    console.log('Ada Nama Yang Sama');
+    swal("Maaf!", "Terdapat Data Yang Sama", "error");
     isEditing.value = true;
-    // kalau sedang mengedit
-        if (i !== undefined) {
-          const item = milestoneList.value[i];
-          idMilestone.value = item.id_milestone;
-          setValues({ nama_milestone : item.nama_milestone, id_proyek : item.id_proyek });
-        }
-    }
-    function kembali() {
-        isEditing.value = false;
-        resetForm();
-    }
+  }
+  }
+  async function hapusMilestone(i: number) {
+  const y = await showConfirmDialog(`Data milestone akan dihapus permanen`);
+  if (y) {
+      try {
+      await api.deleteResource(`/api/milestone/${milestoneList.value[i].id_milestone}`);
+      loadMilestone();
+      } catch (err) {
+      console.log(err);
+      swal("Maaf!", "Milestone Tidak Dapat Dihapus, Dikarenakan Terdapat Tugas Didalamnya!", "error");
+      }
+  }
+  }
+  const notifList = ref<any[]>([]);
+  async function loadNotif(){
+    notifList.value = [];
+    const d = await api.getResource('/api/notif');
+    notifList.value = d;
+  }
 
-    async function simpanMilestone() {
-    let url = '/api/milestone';
-    if (idMilestone.value > 0) {
-        url += `/${idMilestone.value}`;
-    }
-    try {
-        await api.postResource(url, { 
-        nama_milestone: nama_milestone.value, id_proyek: id_proyek.value
-        }, idMilestone.value > 0 ? 'PUT' : 'POST');
-        isEditing.value = false;
-        resetForm();
-        loadMilestone();
-    } catch (err) {
-        console.log(err);
-    }
-    }
-    async function hapusMilestone(i: number) {
-    const y = await showConfirmDialog(`Data milestone akan dihapus permanen`);
-    if (y) {
-        try {
-        await api.deleteResource(`/api/milestone/${milestoneList.value[i].id_milestone}`);
-        loadMilestone();
-        } catch (err) {
-        console.log(err);
-        }
-    }
-    }
-    const notifList = ref<any[]>([]);
-    async function loadNotif(){
-      notifList.value = [];
-      const d = await api.getResource('/api/notif');
-      notifList.value = d;
-    }
-
-    /**
-     * MOUNTED, LOAD DATA MILESTONE
-     */
-    onMounted(async() => {
-      loadMilestone(),
-      loadProyek(),
-      loadNotif()
-    });
+  /**
+   * MOUNTED, LOAD DATA MILESTONE
+   */
+  onMounted(async() => {
+    loadMilestone(),
+    loadProyek(),
+    loadNotif()
+  });
 
 </script>
 
@@ -149,7 +160,15 @@ import Child from './Child.vue';
 
             <div class="container">
               <div class="row align-items-center py-3">
-                <div class="col-lg-6">
+                <small>Show</small>
+                  <div class="col-lg-1">
+                    <select class="form-control responsive" id="id_proyek" v-model="limit" @change="showEntri()">
+                      <option selected>2</option>
+                      <option v-for="proyek in angka"> {{ proyek }} </option>
+                    </select>
+                  </div>
+                <small>Entries</small>
+                <div class="col-lg-4">
                     <form class="form-inline ml-3">
                         <input class="form-control mr-sm-1" @keyup="loadMilestone()" v-model="query" type="search" placeholder="Cari..." aria-label="Search">
                     </form>
@@ -171,21 +190,26 @@ import Child from './Child.vue';
                 <thead class="thead-light">
                   <tr>
                     <th scope="col">No</th>
-                    <th scope="col">Nama Milestone</th>
-                    <th scope="col">Nama Proyek</th>
+                    <th scope="col">Milestone</th>
                     <th scope="col">Aksi</th>
                   </tr>
                 </thead>
                 <tbody class="list" v-for="(milestone, i) in milestoneList" :key="i">
-                  <tr>
-                    <th scope="row">{{ i+1 }}</th>
-                    <td scope="row">{{ milestone.nama_milestone }}</td>
-                    <td scope="row">{{ milestone.nama_proyek }}</td>
-                    <td>
+                <tr>
+                  <td scope="row align-top" class="col-md-1">{{ i+1 }}</td>
+                  <td>
+                    <div class="row">
+                      <div class="col">
+                        <span class="badge badge-info">{{ milestone.nama_proyek }}</span>
+                        <p title="nomor" class="mb-0">{{ milestone.nama_milestone }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="col-2">
                     <button class="btn btn-primary" @click="editMilestone(i)">Edit</button>
                     <button class="btn btn-danger" @click="hapusMilestone(i)">Hapus</button>
-                    </td>
-                  </tr>
+                  </td>
+                </tr>
                 </tbody>
               </table>
             </div>

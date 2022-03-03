@@ -23,6 +23,7 @@ export default defineComponent({
 
                 router.replace('/home');
             } catch (error){
+                console.log('Salah Woy');
                 this.error = 'Username/Password yang Anda Masukkan Salah!';
             }
             

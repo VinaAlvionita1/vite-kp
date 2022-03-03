@@ -7,6 +7,7 @@ import Api from '../services/api';
 import { useField, useForm } from 'vee-validate';
 import * as yup from 'yup';
 import { showConfirmDialog } from '../services/helpers';
+import swal from 'sweetalert';
 
 const query = ref('');
 const api: Api = new Api();
@@ -65,8 +66,13 @@ async function simpanKaryawan() {
 async function hapusKaryawan(i: number) {
   const y = await showConfirmDialog(`Data karyawan akan dihapus!`);
   if (y) {
-    await api.deleteResource(`/api/karyawan/${karyawanList.value[i].id_karyawan}`);
-    loadData();
+    try{
+      await api.deleteResource(`/api/karyawan/${karyawanList.value[i].id_karyawan}`);
+      loadData();
+    } catch (err){
+      console.log('Ada Tugasnya Woy!');
+      swal("Maaf!", "Data Tidak Dapat Dihapus, Dikarenakan Karyawan Bertanggung Jawab Atas Beberapa Tugas!", "error");
+    }
   }
 }
 
@@ -146,8 +152,8 @@ onMounted(async () => {
                   <tr>
                     <th scope="col">No</th>
                     <th scope="col">Nama Karyawan</th>
-                    <th scope="col">Telephone</th>
                     <th scope="col">Email</th>
+                    <th scope="col">Telephone</th>
                     <th scope="col">Jabatan</th>
                     <th scope="col">Aksi</th>
                   </tr>

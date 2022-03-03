@@ -11,9 +11,11 @@ import Pagination from '../components/pagination.vue';
 
   const query = ref<number>();
   const api: Api = new Api();
+  const angka = ref<number[]>([5, 10, 15, 20]);
+  const limit = ref(2);
   const { loadData: loadTugas, result: tugasList, pages: pageList,
   page: currentPage, isFirstPage, isLastPage, gotoPage,
-  nextPage, prevPage } = usePagination('/api/tugas', 2, query);
+  nextPage, prevPage, changeLimit } = usePagination('/api/tugas', limit.value, query);
 
   const { loadData: loadMilestone, result: pilihMilestone } = usePagination('/api/milestone', 30, query);
   const { loadData: loadKaryawan, result: pilihKaryawan } = usePagination('/api/karyawan', 30, query);
@@ -44,6 +46,11 @@ import Pagination from '../components/pagination.vue';
   const { value: id_kategori } = useField<string>('id_kategori');
   const { value: id_status } = useField<string>('id_status');
   const { value: id_karyawan } = useField<string>('id_karyawan');
+
+  async function showEntri(){
+    changeLimit(limit.value);
+    loadTugas();
+  }
 
   function editTugas(i?: number) {
   idTugas.value = 0;
@@ -140,7 +147,13 @@ onMounted(async () => {
                 <i class="ni ni-bell-55"></i>
               </button>
               <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                <b class="dropdown-item" type="button" v-for="notif in notifList"> {{ notif.pesan }} </b><br>
+                <b class="dropdown-item" type="button" v-for="notif in notifList"> 
+                <span>
+                  <router-link to="/tugas-data" class="btn btn-warning" type="button">Atur Milestone</router-link>
+                </span>
+                {{ notif.pesan }} 
+                </b>
+                <br>
               </div>
             </div>
           </div>
@@ -164,13 +177,8 @@ onMounted(async () => {
 
           <div class="container">
             <div class="row align-items-center py-3">
-              <form class="col-lg-12">
-                <div class="col-lg-3">
-                  <select class="form-control" id="id_milestone" @click="loadTugas()" v-model="query">
-                    <option value="">Pilih Milestone</option>
-                    <option v-for="milestone in pilihMilestone" :key="milestone.id_milestone" :value="milestone.id_milestone"> {{ milestone.nama_milestone }} </option>
-                  </select>
-                </div>
+              <form class="form-inline ml-3">
+                <input class="form-control mr-sm-1" @keyup="loadTugas" v-model="query" type="search" placeholder="Cari..." aria-label="Search">
               </form>
             </div>
           </div>
@@ -194,12 +202,23 @@ onMounted(async () => {
             </div>
           </nav>
           <!-- End Navbar -->
-
-          <div class="col-lg-12 mt-2 text-right">
-            <a href="#" class="btn btn-primary" type="button" @click="editTugas()"> + Tugas </a>
-            <span>
-              <router-link to="/milestone" class="btn btn-warning" type="button">Atur Milestone</router-link>
-            </span>
+          <div class="container">
+            <div class="row align-items-center py-3 ml-2">
+              <small>Show</small>
+                <div class="col-lg-1">
+                  <select class="form-control responsive" id="id_proyek" v-model="limit" @change="showEntri()">
+                    <option selected>2</option>
+                    <option v-for="proyek in angka"> {{ proyek }} </option>
+                  </select>
+                </div>
+              <small>Entries</small>
+              <div class="col-lg-10 mt-2 text-right">
+                <a href="#" class="btn btn-primary" type="button" @click="editTugas()"> + Tugas </a>
+                <span>
+                  <router-link to="/milestone" class="btn btn-warning" type="button">Atur Milestone</router-link>
+                </span>
+              </div>
+            </div>
           </div>
                 
           <!-- Light table -->
@@ -219,14 +238,13 @@ onMounted(async () => {
                     <div class="row">
                       <div class="col">
                         <span>
+                          <span class="badge badge-info">{{ tugas.nama_statuskerja }}</span>
                           <span class="badge badge-warning mr-3">{{ tugas.status_kategori }} </span>
                           <span class="badge badge-success fs-5 font-weight-bolder" title="tanggal mulai">{{ tugas.tgl_mulai_tugas.split('-').reverse().join('/') }}</span> - <span title="tanggal_selesai" class="badge badge-danger font-weight-bolder mr-3">{{ tugas.tgl_selesai_tugas.split('-').reverse().join('/') }}</span>
                           <i class="fas fa-user mr-3">{{ tugas.nama_karyawan }}</i> 
-                          <span class="badge badge-info">{{ tugas.nama_statuskerja }}</span>
                         </span>
-                        <h4 class="mr-3">{{ tugas.nama_tugas }} 
-                          <span class="badge badge-secondary">{{ tugas.keterangan_tugas }}</span>
-                        </h4> 
+                        <h4 class="mr-3">{{ tugas.nama_tugas }}</h4> 
+                        <h5>{{ tugas.keterangan_tugas }}</h5>
                         <p>{{ tugas.nama_milestone }}</p>
                       </div>
                     </div>
